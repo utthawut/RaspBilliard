@@ -28,6 +28,9 @@ The arcade machine/simulator will consist of accelerometer and infrared sensor t
 - The Angle that the cue stick is elevated (0-90 degress)
 - The position of impact on the cue ball (Cue-Ball impact)
 
+
+
+
 .. image:: images/game_1.jpg
    :align: right
    
@@ -45,3 +48,7 @@ The arcade machine/simulator will consist of accelerometer and infrared sensor t
    
 .. image:: images/schemetic.jpg
    :align: right
+   
+Thank you Mr. Theeraphan Upan, he help me write this schemetic. And he will make PCB soon.
+
+[RaspBilliard video](https://www.youtube.com/watch?v=04EXz3RdWic)
