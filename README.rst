@@ -1,0 +1,42 @@
+RaspBillard
+====================
+The RaspBilliard is Low-cost Virtual Realistic Billiard Simulator, 
+running on Raspberry Pi
+
+Acknowledgements
+====================
+Development of this project would not have been possible without, 
+- AN EVENT-BASED POOL PHYSICS SIMULATOR <http://web.stanford.edu/group/billiards/AnEventBasedPoolPhysicsSimulator.pdf>
+- POOL PHYSICS SIMULATION BY EVENT PREDICTION II: COLLISIONS <http://web.stanford.edu/group/billiards/PoolPhysicsSimulationByEventPrediction2Collisions.pdf>
+- pi3d <https://github.com/tipam/pi3d>
+
+Dependencies
+====================
+- pi3d
+- numpy
+- cython
+
+Concept Overview
+====================
+The arcade machine/simulator will consist of accelerometer and infared sensor to measure,
+- How fast is the cue ball collided with the cue stick (m/s)
+- The Angle that the cue stick is elevated (0-90 degress)
+- The position of impact on the cue ball (Cue-Ball impact)
+
+.. image:: images/game_1.jpg
+   :align: right
+   
+.. image:: images/game_concept_1.jpg
+   :align: right
+   
+.. image:: images/game_concept_2.jpg
+   :align: right
+   
+.. image:: images/game_concept_3.jpg
+   :align: right
+   
+.. image:: images/game_concept_4.jpg
+   :align: right
+   
+.. image:: images/schemetic.jpg
+   :align: right
