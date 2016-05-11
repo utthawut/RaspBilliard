@@ -1,0 +1,3 @@
+LIBRARY solve.pyd
+EXPORTS
+PyInit_solve
