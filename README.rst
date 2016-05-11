@@ -5,10 +5,14 @@ running on Raspberry Pi
 
 Acknowledgements
 ====================
-Development of this project would not have been possible without, 
-* AN EVENT-BASED POOL PHYSICS SIMULATOR <http://web.stanford.edu/group/billiards/AnEventBasedPoolPhysicsSimulator.pdf>
-* POOL PHYSICS SIMULATION BY EVENT PREDICTION II: COLLISIONS <http://web.stanford.edu/group/billiards/PoolPhysicsSimulationByEventPrediction2Collisions.pdf>
-* pi3d <https://github.com/tipam/pi3d>
+Development of this project would not have been possible without following document and library. 
+
+1.  AN EVENT-BASED POOL PHYSICS SIMULATOR http://web.stanford.edu/group/billiards/AnEventBasedPoolPhysicsSimulator.pdf  
+
+2.  POOL PHYSICS SIMULATION BY EVENT PREDICTION II: COLLISIONS http://web.stanford.edu/group/billiards/PoolPhysicsSimulationByEventPrediction2Collisions.pdf  
+
+3.  pi3d <https://github.com/tipam/pi3d>  
+
 
 Dependencies
 ====================
@@ -18,7 +22,8 @@ Dependencies
 
 Concept Overview
 ====================
-The arcade machine/simulator will consist of accelerometer and infared sensor to measure,
+The arcade machine/simulator will consist of accelerometer and infrared sensor to measure,
+
 - How fast is the cue ball collided with the cue stick (m/s)
 - The Angle that the cue stick is elevated (0-90 degress)
 - The position of impact on the cue ball (Cue-Ball impact)
