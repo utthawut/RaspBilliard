@@ -6,9 +6,9 @@ running on Raspberry Pi
 Acknowledgements
 ====================
 Development of this project would not have been possible without, 
-- AN EVENT-BASED POOL PHYSICS SIMULATOR <http://web.stanford.edu/group/billiards/AnEventBasedPoolPhysicsSimulator.pdf>
-- POOL PHYSICS SIMULATION BY EVENT PREDICTION II: COLLISIONS <http://web.stanford.edu/group/billiards/PoolPhysicsSimulationByEventPrediction2Collisions.pdf>
-- pi3d <https://github.com/tipam/pi3d>
+* AN EVENT-BASED POOL PHYSICS SIMULATOR <http://web.stanford.edu/group/billiards/AnEventBasedPoolPhysicsSimulator.pdf>
+* POOL PHYSICS SIMULATION BY EVENT PREDICTION II: COLLISIONS <http://web.stanford.edu/group/billiards/PoolPhysicsSimulationByEventPrediction2Collisions.pdf>
+* pi3d <https://github.com/tipam/pi3d>
 
 Dependencies
 ====================
