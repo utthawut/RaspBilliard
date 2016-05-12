@@ -403,7 +403,9 @@ class PoolBall(object):
     table = None
     t_table = 0
     """ This class is used to create billiard ball"""
-    def __init__(self, name="", ball_index=0, camera=None, light=None, state=STATIONARY_STATE, heading_angle=0, r=common.ZERO_VECTOR, v=common.ZERO_VECTOR, w=common.ZERO_VECTOR, u=common.ZERO_VECTOR, traject_instance=False):
+    def __init__(self, name="", ball_index=0, camera=None, light=None, state=STATIONARY_STATE, heading_angle=0,
+                 r=common.ZERO_VECTOR, v=common.ZERO_VECTOR, w=common.ZERO_VECTOR, u=common.ZERO_VECTOR,
+                 traject_instance=False):
     
         if traject_instance:
             PoolBall.instances_traject.append(self)  # Register traject_instance for calculating trajectories
