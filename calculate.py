@@ -20,12 +20,25 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from __future__ import division
+
 import numpy as np
 import pi3d
 import cmath
 import common
 import table
-import speedup.solve as solve
+try:
+  import speedup.solve as solve
+  USE_CYTHON = True
+except:
+  def solve_polynomial(p):
+    ''' p is array of polynomial coefficients
+    '''
+    r = np.roots(p)
+    real_pos = r[(r.imag == 0.0j) & (r.real >= 0.0)]
+    return real_pos.real.min() if len(real_pos) > 0 else -31.0 # no real positive roots, ho-hum
+  USE_CYTHON = False
+
 
 TimeSpeedUp = 0.0
 G = 9.8
@@ -64,15 +77,15 @@ class BilliardBall(object):
         cls.abs_r_square = cls.abs_r * cls.abs_r
         
         if 'ball_mass' in locals():
-            cls.inertia_sphere = (2/5)*cls.ball_mass*cls.r_square
+            cls.inertia_sphere = (2.0 / 5.0) * cls.ball_mass * cls.r_square
         else:
-            cls.inertia_sphere = (2/5)*common.DEF_BALL_MASS*cls.r_square
+            cls.inertia_sphere = (2.0 / 5.0) * common.DEF_BALL_MASS * cls.r_square
         
     @classmethod
     def set_mass(cls, ball_mass, cue_mass):
         cls.ball_mass = ball_mass
         cls.cue_mass = cue_mass
-        cls.inertia_sphere = (2/5)*cls.ball_mass*cls.r_square
+        cls.inertia_sphere = (2.0 / 5.0) * cls.ball_mass * cls.r_square
 
 
 class MotionFrict(object):
@@ -95,28 +108,28 @@ class CalConst(object):
     @classmethod
     def initial_constant(cls):
         # Sliding Motion
-        cls.SEVEN_SLIDE_FRICT_G_DIV_TWO = (7/2)*MotionFrict.slide_frict*G
-        cls.TWO_DIV_SEVEN_SLIDE_FRICT_G = 2/(7*MotionFrict.slide_frict*G)
-        cls.ZERO_P_FIVE_SLIDE_FRICT_G = 0.5*MotionFrict.slide_frict*G
-        cls.SLIDE_FRICT_G = MotionFrict.slide_frict*G
+        cls.SEVEN_SLIDE_FRICT_G_DIV_TWO = (7.0 / 2.0) * MotionFrict.slide_frict * G
+        cls.TWO_DIV_SEVEN_SLIDE_FRICT_G = 2.0 / (7.0 * MotionFrict.slide_frict * G)
+        cls.ZERO_P_FIVE_SLIDE_FRICT_G = 0.5 * MotionFrict.slide_frict * G
+        cls.SLIDE_FRICT_G = MotionFrict.slide_frict * G
 
         # Rolling Motion
-        cls.ZERO_P_FIVE_ROLL_FRICT_G = 0.5*MotionFrict.roll_frict*G
-        cls.ROLL_FRICT_G = MotionFrict.roll_frict*G
+        cls.ZERO_P_FIVE_ROLL_FRICT_G = 0.5 * MotionFrict.roll_frict * G
+        cls.ROLL_FRICT_G = MotionFrict.roll_frict * G
 
         # Spin Motion
-        cls.FIVE_SPIN_FRICT_G_DIV_TWO_R = (5*MotionFrict.spin_frict*G)/BilliardBall.two_r
-        cls.TWO_R_DIV_FIVE_SPIN_FRICT_G = BilliardBall.two_r/(5*MotionFrict.spin_frict*G)
+        cls.FIVE_SPIN_FRICT_G_DIV_TWO_R = (5.0 * MotionFrict.spin_frict * G) / BilliardBall.two_r
+        cls.TWO_R_DIV_FIVE_SPIN_FRICT_G = BilliardBall.two_r / (5.0 * MotionFrict.spin_frict * G)
 
         # Predict Collision
-        cls.G_DIV_TWO = G/2
+        cls.G_DIV_TWO = G / 2.0
 
 
 # common functions
 def cal_unit_vector(vector):
     magnitude = np.linalg.norm(vector)
     if magnitude > 0:
-        return vector/magnitude
+        return vector / magnitude
     else:
         return np.copy(vector)
 
@@ -202,13 +215,13 @@ def cal_cue_impact(a=0, b=0, theta=0, v_cue=1):
     c = np.sqrt(BilliardBall.r_square - a_square_plus_b_square)
 
     f = ((2*BilliardBall.ball_mass*v_cue) /
-         (1 + (BilliardBall.ball_mass/BilliardBall.cue_mass) +
-          ((5/(2*BilliardBall.r_square)) * (a_square + b_square*(0.5 + 0.5*cos_2theta) +
-                                            (c*c*(0.5 - 0.5*cos_2theta)) - (2*b*c*cos_theta*sin_theta)))))
+          (1 + (BilliardBall.ball_mass / BilliardBall.cue_mass) +
+          ((5 / (2 * BilliardBall.r_square)) * (a_square + b_square * (0.5 + 0.5 * cos_2theta) +
+                  (c * c * (0.5 - 0.5 * cos_2theta)) - (2 * b * c * cos_theta * sin_theta)))))
     vx = 0.0
     vy = -(f/BilliardBall.ball_mass)*cos_theta
     vz = -(f/BilliardBall.ball_mass)*sin_theta
-    
+    print(BilliardBall.inertia_sphere)
     wx = ((-c*f*sin_theta) + (b*f*cos_theta))/BilliardBall.inertia_sphere
     wy = (a*f*sin_theta)/BilliardBall.inertia_sphere
     wz = (-a*f*cos_theta)/BilliardBall.inertia_sphere
@@ -349,7 +362,7 @@ def is_circle_line_segment_intersect2(circle_center, start_line, end_line, epsil
     b = 2*np.dot(d, f)
     c = np.dot(f, f) - r_square_tmp
     
-    root = solve.cython_solve_quadratic(a, b, c)
+    root = solve.cython_solve_quadratic(a, b, c) if USE_CYTHON else solve_polynomial([a, b, c])
     if 0 >= root <= 1:
         # intersect_point = start_line + roots[i]*d
         intersect_point = start_line + (root*d_abs)*d_unit
@@ -424,18 +437,23 @@ class PoolBall(object):
                 sx=common.DIM_RATIO, sy=common.DIM_RATIO, sz=common.DIM_RATIO,
                 light=pi3d.Light(
                     lightpos=(0, (table.BilliardTable.table_height+BilliardBall.r)*common.DIM_RATIO*1.5, 0),
-                    lightcol=(0.5, 0.5, 0.5), lightamb=(0.5, 0.5, 0.5), is_point=False))
+                    lightcol=(0.5, 0.5, 0.5), lightamb=(0.5, 0.5, 0.5), is_point=False) if light is None else light)
 
             PoolBall.instances.append(self)  # Register actual instance on the table
             
             # Create Empty for rotation
             self.empty1 = pi3d.Triangle(corners=((-0.01, 0.0), (0.0, 0.01), (0.01, 0.0)), z=z_render)
+            self.shadow = pi3d.Sprite(h=BilliardBall.r * common.DIM_RATIO * 2.5, 
+                                      w=BilliardBall.r * common.DIM_RATIO * 2.5, rx=90)
             self.empty2 = pi3d.Triangle(corners=((-0.01, 0.0), (0.0, 0.01), (0.01, 0.0)))
             self.empty1.add_child(self.empty2)
             self.empty2.add_child(self.ball_model)
             
             self.empty1.positionX(x_render)
             self.empty1.positionY(y_render)
+            self.shadow.positionX(self.empty1.x())
+            self.shadow.positionY(self.empty1.y() - BilliardBall.r * common.DIM_RATIO + 0.001 * (1 + len(PoolBall.instances)))
+            self.shadow.positionZ(self.empty1.z())
             
         # create new instance variable only on __init__ (Simple is better than complex)
         self.name = name
@@ -566,6 +584,9 @@ class PoolBall(object):
                 self.empty2.rotateIncX(angle)
 
         self.empty1.draw()
+        self.shadow.positionX(self.empty1.x())
+        self.shadow.positionZ(self.empty1.z())
+        self.shadow.draw()
 
     def find_time_to_collision(self, find_traject=False):
         global TimeSpeedUp
@@ -713,11 +734,11 @@ class PoolBall(object):
         x0 = (cx*cx + cy*cy) - (4*BilliardBall.r_square)
 
         if x4:
-            root = solve.cython_solve_quartic(x4, x3, x2, x1, x0)
+            root = solve.cython_solve_quartic(x4, x3, x2, x1, x0) if USE_CYTHON else solve_polynomial([x4, x3, x2, x1, x0])
         elif x3:
-            root = solve.cython_solve_cubic(x3, x2, x1, x0)
+            root = solve.cython_solve_cubic(x3, x2, x1, x0) if USE_CYTHON else solve_polynomial([x3, x2, x1, x0])
         elif x2:
-            root = solve.cython_solve_quadratic(x2, x1, x0)
+            root = solve.cython_solve_quadratic(x2, x1, x0) if USE_CYTHON else solve_polynomial([x2, x1, x0])
         else:
             return common.MAX_TIME
 
@@ -758,7 +779,7 @@ class PoolBall(object):
 
         # Left Rail
         x0 = rx - table.BilliardTable.left_rail_r
-        root = solve.cython_solve_quadratic(x2, x1, x0)
+        root = solve.cython_solve_quadratic(x2, x1, x0) if USE_CYTHON else solve_polynomial([x2, x1, x0])
         t_target = root - self.t
         if t_target > 0:
             if t_target <= t:
@@ -768,7 +789,7 @@ class PoolBall(object):
 
         # Right Rail
         x0 = rx - table.BilliardTable.right_rail_r
-        root = solve.cython_solve_quadratic(x2, x1, x0)
+        root = solve.cython_solve_quadratic(x2, x1, x0) if USE_CYTHON else solve_polynomial([x2, x1, x0])
         t_target = root - self.t
         if t_target > 0:
             if t_target <= t:
@@ -782,7 +803,7 @@ class PoolBall(object):
 
         # Top Rail
         x0 = ry - table.BilliardTable.top_rail_r
-        root = solve.cython_solve_quadratic(x2, x1, x0)
+        root = solve.cython_solve_quadratic(x2, x1, x0) if USE_CYTHON else solve_polynomial([x2, x1, x0])
         t_target = root - self.t
         if t_target > 0:
             if t_target <= t:
@@ -792,7 +813,7 @@ class PoolBall(object):
 
         # Bottom Rail
         x0 = ry - table.BilliardTable.bot_rail_r
-        root = solve.cython_solve_quadratic(x2, x1, x0)
+        root = solve.cython_solve_quadratic(x2, x1, x0) if USE_CYTHON else solve_polynomial([x2, x1, x0])
         t_target = root - self.t
         if t_target > 0:
             if t_target <= t:
@@ -825,7 +846,7 @@ class PoolBall(object):
             x1 = v*(eq[table.LineEq.A_COEF]*sin_theta - eq[table.LineEq.B_COEF]*cos_theta)
             x0 = -(eq[table.LineEq.A_COEF]*rx + eq[table.LineEq.B_COEF]*ry + eq[table.LineEq.C_COEF])
 
-            root = solve.cython_solve_quadratic(x2, x1, x0)
+            root = solve.cython_solve_quadratic(x2, x1, x0) if USE_CYTHON else solve_polynomial([x2, x1, x0])
             t_target = root - self.t
             if t_target > 0:
                 if t_target <= t:
@@ -848,11 +869,11 @@ class PoolBall(object):
             x0 = (cx*cx + cy*cy) - BilliardBall.r_square
 
             if x4:
-                root = solve.cython_solve_quartic(x4, x3, x2, x1, x0)
+                root = solve.cython_solve_quartic(x4, x3, x2, x1, x0) if USE_CYTHON else solve_polynomial([x4, x3, x2, x1, x0])
             elif x3:
-                root = solve.cython_solve_cubic(x3, x2, x1, x0)
+                root = solve.cython_solve_cubic(x3, x2, x1, x0) if USE_CYTHON else solve_polynomial([x3, x2, x1, x0])
             elif x2:
-                root = solve.cython_solve_quadratic(x2, x1, x0)
+                root = solve.cython_solve_quadratic(x2, x1, x0) if USE_CYTHON else solve_polynomial([x2, x1, x0])
 
             t_target = root - self.t
             if t_target > 0:
@@ -895,11 +916,11 @@ class PoolBall(object):
             x0 = (cx*cx + cy*cy) - table.BilliardTable.r_of_pocket_width_square
 
             if x4:
-                root = solve.cython_solve_quartic(x4, x3, x2, x1, x0)
+                root = solve.cython_solve_quartic(x4, x3, x2, x1, x0) if USE_CYTHON else solve_polynomial([x4, x3, x2, x1, x0])
             elif x3:
-                root = solve.cython_solve_cubic(x3, x2, x1, x0)
+                root = solve.cython_solve_cubic(x3, x2, x1, x0) if USE_CYTHON else solve_polynomial([x3, x2, x1, x0])
             elif x2:
-                root = solve.cython_solve_quadratic(x2, x1, x0)
+                root = solve.cython_solve_quadratic(x2, x1, x0) if USE_CYTHON else solve_polynomial([x2, x1, x0])
 
             t_target = root - self.t
             if t_target > 0:

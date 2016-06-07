@@ -24,7 +24,8 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from math import sin, cos, radians
-
+import sys
+sys.path.insert(1,'/home/patrick/pi3d')
 import pi3d
 import common
 import table
@@ -48,7 +49,7 @@ MAX_CAM_TILT = 90
 MAX_V_CUE = 40
 
 # Load display screen
-DISPLAY = pi3d.Display.create(x=200, y=200)
+DISPLAY = pi3d.Display.create(x=100, y=100, samples=2)
 
 # Initial Game Type
 table.BilliardTable.set_detail_auto(table_type=table.TableType.POOL, table_size=table.TableSize.EIGHT_FT,
@@ -59,17 +60,22 @@ calculate.CalConst.initial_constant()
 
 # Create Shader
 BallShader = pi3d.Shader("mat_reflect")
-TableShader = pi3d.Shader("mat_reflect")
+TableShader = BallShader
+ShadowShader = pi3d.Shader("uv_flat")
+Normtex = pi3d.Texture("media/textures/grasstile_n.jpg")
+Shinetex = pi3d.Texture("media/textures/photosphere_small.jpg")
+Shadowtex = pi3d.Texture("media/textures/shadow.png")
 
 # Create Light
 light_source = pi3d.Light(
-    lightpos=(0, (table.BilliardTable.table_height+calculate.BilliardBall.r)*common.DIM_RATIO*1.2, 0),
-    lightcol=(0.5, 0.5, 0.5), lightamb=(0.5, 0.5, 0.5), is_point=False)
+    lightpos=(10, -(table.BilliardTable.table_height+calculate.BilliardBall.r)*common.DIM_RATIO*5.2, 1),
+    lightcol=(0.9, 0.9, 0.8), lightamb=(0.3, 0.3, 0.3), is_point=False)
 
 # Create Table
 TableModel = pi3d.Model(file_string='media/models/Pool_Table_8ft.obj', name='Table',
                         sx = common.DIM_RATIO, sy=common.DIM_RATIO, sz=common.DIM_RATIO, light=light_source)
 TableModel.set_shader(TableShader)
+TableModel.set_normal_shine(Normtex, 500.0, Shinetex, 0.05, bump_factor=0.1)
 
 # Create Trajectories
 traject_list = [(i*0.1, i*0.1, i*0.1) for i in range(500)]
@@ -88,70 +94,72 @@ cue_ball = calculate.PoolBall(name="Cue_Ball", ball_index=0, state=calculate.STA
                                       [0, table.BilliardTable.bot_rail_r+DIAMETER*10,
                                        table.BilliardTable.table_height+table.BilliardTable.r]),
                                   v=common.ZERO_VECTOR, w=common.ZERO_VECTOR, u=common.ZERO_VECTOR, heading_angle=0,
-                                  traject_instance=False)
+                                  traject_instance=False, light=light_source)
 pool_ball_5 = calculate.PoolBall(name="Pool_Ball_5", ball_index=5, state=calculate.STATIONARY_STATE,
                                      r=np.array(
                                          [0, table.BilliardTable.bot_rail_r+DIAMETER*30,
                                           table.BilliardTable.table_height+table.BilliardTable.r]),
                                      v=common.ZERO_VECTOR, w=common.ZERO_VECTOR, u=common.ZERO_VECTOR, heading_angle=0,
-                                     traject_instance=False)
+                                     traject_instance=False, light=light_source)
 pool_ball_6 = calculate.PoolBall(name="Pool_Ball_6", ball_index=6, state=calculate.STATIONARY_STATE,
                                      r=np.array(
                                          [pool_ball_5.r[common.X_AXIS] + DIAMETER, pool_ball_5.r[common.Y_AXIS],
                                           table.BilliardTable.table_height+table.BilliardTable.r]),
                                      v=common.ZERO_VECTOR, w=common.ZERO_VECTOR, u=common.ZERO_VECTOR, heading_angle=0,
-                                     traject_instance=False)
+                                     traject_instance=False, light=light_source)
 pool_ball_4 = calculate.PoolBall(name="Pool_Ball_4", ball_index=4, state=calculate.STATIONARY_STATE,
                                      r=np.array(
                                          [pool_ball_5.r[common.X_AXIS] - DIAMETER, pool_ball_5.r[common.Y_AXIS],
                                           table.BilliardTable.table_height+table.BilliardTable.r]),
                                      v=common.ZERO_VECTOR, w=common.ZERO_VECTOR, u=common.ZERO_VECTOR, heading_angle=0,
-                                     traject_instance=False)
+                                     traject_instance=False, light=light_source)
 pool_ball_3 = calculate.PoolBall(name="Pool_Ball_3", ball_index=3, state=calculate.STATIONARY_STATE,
                                      r=np.array(
                                          [pool_ball_5.r[common.X_AXIS] + r_epsil_breaking,
                                           pool_ball_5.r[common.Y_AXIS]-common.COS_30*DIAMETER,
                                           table.BilliardTable.table_height+table.BilliardTable.r]),
                                      v=common.ZERO_VECTOR, w=common.ZERO_VECTOR, u=common.ZERO_VECTOR, heading_angle=0,
-                                     traject_instance=False)
+                                     traject_instance=False, light=light_source)
 pool_ball_2 = calculate.PoolBall(name="Pool_Ball_2", ball_index=2, state=calculate.STATIONARY_STATE,
                                      r=np.array(
                                          [pool_ball_5.r[common.X_AXIS] - r_epsil_breaking,
                                           pool_ball_5.r[common.Y_AXIS]-common.COS_30*DIAMETER,
                                           table.BilliardTable.table_height+table.BilliardTable.r]),
                                      v=common.ZERO_VECTOR, w=common.ZERO_VECTOR, u=common.ZERO_VECTOR, heading_angle=0,
-                                     traject_instance=False)
+                                     traject_instance=False, light=light_source)
 pool_ball_1 = calculate.PoolBall(name="Pool_Ball_1", ball_index=1, state=calculate.STATIONARY_STATE,
                                      r=np.array(
                                          [pool_ball_5.r[common.X_AXIS],
                                           pool_ball_3.r[common.Y_AXIS]-common.COS_30*DIAMETER,
                                           table.BilliardTable.table_height+table.BilliardTable.r]),
                                      v=common.ZERO_VECTOR, w=common.ZERO_VECTOR, u=common.ZERO_VECTOR, heading_angle=0,
-                                     traject_instance=False)
+                                     traject_instance=False, light=light_source)
 pool_ball_8 = calculate.PoolBall(name="Pool_Ball_8", ball_index=8, state=calculate.STATIONARY_STATE,
                                      r=np.array(
                                          [pool_ball_5.r[common.X_AXIS] + r_epsil_breaking,
                                           pool_ball_5.r[common.Y_AXIS]+common.COS_30*DIAMETER,
                                           table.BilliardTable.table_height+table.BilliardTable.r]),
                                      v=common.ZERO_VECTOR, w=common.ZERO_VECTOR, u=common.ZERO_VECTOR, heading_angle=0,
-                                     traject_instance=False)
+                                     traject_instance=False, light=light_source)
 pool_ball_7 = calculate.PoolBall(name="Pool_Ball_7", ball_index=7, state=calculate.STATIONARY_STATE,
                                      r=np.array(
                                          [pool_ball_5.r[common.X_AXIS] - r_epsil_breaking,
                                           pool_ball_5.r[common.Y_AXIS]+common.COS_30*DIAMETER,
                                           table.BilliardTable.table_height+table.BilliardTable.r]),
                                      v=common.ZERO_VECTOR, w=common.ZERO_VECTOR, u=common.ZERO_VECTOR, heading_angle=0,
-                                     traject_instance=False)
+                                     traject_instance=False, light=light_source)
 pool_ball_9 = calculate.PoolBall(name="Pool_Ball_9", ball_index=9, state=calculate.STATIONARY_STATE,
                                      r=np.array(
                                          [pool_ball_5.r[common.X_AXIS],
                                           pool_ball_8.r[common.Y_AXIS]+common.COS_30*DIAMETER,
                                           table.BilliardTable.table_height+table.BilliardTable.r]),
                                      v=common.ZERO_VECTOR, w=common.ZERO_VECTOR, u=common.ZERO_VECTOR, heading_angle=0,
-                                     traject_instance=False)
+                                     traject_instance=False, light=light_source)
 
 for ball_obj in calculate.PoolBall.instances:
     ball_obj.ball_model.set_shader(BallShader)
+    ball_obj.ball_model.set_normal_shine(Normtex, 0.0, Shinetex, 0.1, is_uv=False, bump_factor=0.0)
+    ball_obj.shadow.set_draw_details(ShadowShader, [Shadowtex])
 
 
 # Initial Input of Cue Stick parameters
@@ -174,7 +182,7 @@ CamEnable = True
 
 # Create key presses (keyboard)
 MyKeys = pi3d.Keyboard()
-
+camera_position = None
 while DISPLAY.loop_running():
     
     # move camera circularly around cue ball 
@@ -182,11 +190,16 @@ while DISPLAY.loop_running():
         CAMERA.reset()
         CAMERA.rotateX(-CamTilt)
         CAMERA.rotateY(CamRotation)
-        CAMERA.position(((cue_ball.r[common.X_AXIS]*common.DIM_RATIO) +
+        camera_target = [(cue_ball.r[common.X_AXIS] * common.DIM_RATIO) +
                          (CamRadius * sin(radians(CamRotation)) * cos(radians(CamTilt))),
-                         (cue_ball.r[common.Z_AXIS]*common.DIM_RATIO) + (CamRadius * sin(radians(CamTilt))),
-                         (cue_ball.r[common.Y_AXIS]*common.DIM_RATIO) -
-                         (CamRadius * cos(radians(CamRotation)) * cos(radians(CamTilt)))))
+                         (cue_ball.r[common.Z_AXIS] * common.DIM_RATIO) + (CamRadius * sin(radians(CamTilt))),
+                         (cue_ball.r[common.Y_AXIS] * common.DIM_RATIO) -
+                         (CamRadius * cos(radians(CamRotation)) * cos(radians(CamTilt)))]
+        if camera_position is None:
+          camera_position = camera_target
+        else:
+          camera_position = [camera_position[i] * 0.85 + camera_target[i] * 0.15 for i in range(3)]
+        CAMERA.position(camera_position)
 
     TableModel.draw()
     
@@ -224,10 +237,12 @@ while DISPLAY.loop_running():
         if DrawBallFirstTime:
             for ball_obj in calculate.PoolBall.instances:
                 ball_obj.move_draw()
+                ball_obj.shadow.draw()
             DrawBallFirstTime = True
         else:
             for ball_obj in calculate.PoolBall.instances:
                 ball_obj.empty1.draw()
+                ball_obj.shadow.draw()
 
     # Check Keyboard
     k = MyKeys.read()
@@ -345,7 +360,7 @@ while DISPLAY.loop_running():
     if start_shot == StartShot.SHOT_INITIATED or start_shot == StartShot.AIMING_INITIATED:
         start_time_predict = 0
         start_time_respond = 0
-        start_time_over = time.monotonic()
+        start_time_over = time.time()
         traject_list = []
         del frame_to_render [:]
         cue_ball.copy_ball_to_traject()
@@ -404,9 +419,9 @@ while DISPLAY.loop_running():
                 # ball.w_to_render.append(ball.w_roll)
                 ball.heading_angle_changed = False
 
-            tmp_time_respond = time.monotonic()
+            tmp_time_respond = time.time()
             cue_ball_traject.respond_event(find_traject=True, check_event=True)
-            start_time_respond = start_time_respond + (time.monotonic() - tmp_time_respond)
+            start_time_respond = start_time_respond + (time.time() - tmp_time_respond)
 
             for ball in calculate.PoolBall.instances_traject:
                 ball.state_to_render.append(ball.present_state)
@@ -425,11 +440,11 @@ while DISPLAY.loop_running():
                    for ball_obj in calculate.PoolBall.instances_traject):
                 break
             else:
-                tmp_time_predict = time.monotonic()
+                tmp_time_predict = time.time()
                 time_to_event = cue_ball_traject.find_time_to_collision(find_traject=True)
                 normal_loop = int(time_to_event/common.NOR_SAMP_PERIOD)
                 remainder_time = time_to_event % common.NOR_SAMP_PERIOD
-                start_time_predict = start_time_predict + (time.monotonic() - tmp_time_predict)
+                start_time_predict = start_time_predict + (time.time() - tmp_time_predict)
 
         if start_shot == StartShot.SHOT_INITIATED:
             start_shot = StartShot.SHOT_READY
@@ -442,4 +457,4 @@ while DISPLAY.loop_running():
 
         print("*****Time for response:******************", start_time_respond)
         print("*****Time for prediction:******************", start_time_predict)
-        print("*****Time for calculation:******************", time.monotonic() - start_time_over)
+        print("*****Time for calculation:******************", time.time() - start_time_over)
