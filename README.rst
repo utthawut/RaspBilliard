@@ -20,6 +20,43 @@ Dependencies
 - numpy
 - cython
 
+
+Usage
+====================
+Camera movement and aimming
+
+- key 'w' move camera up
+- key 's' move camera down
+- key 'a' move camera left
+- key 'd' move camera right
+- key 'i' zoom in
+- key 'o' zoom out
+
+
+To increase/decrease Cue stick velocity
+
+- key 'k' increae velocity of cue stick
+- key 'l' decrease velocity of cue stick
+
+
+To make English (side spin)
+
+- key 'left' to make the ball slide right
+- key 'right' to make the ball slide left
+
+
+To make top and back spin
+
+- key 'up' for top spin
+- key 'down' for back spin
+
+
+To make curve/masse shots
+
+- key 'u' to elevate cue stick up (increase angle of cuestick)
+- key 'j' to elevate cue stick down (decrease angle of cuestick)
+
+
 Concept Overview
 ====================
 The arcade machine/simulator will consist of accelerometer and infrared sensor to measure,
