@@ -24,8 +24,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from math import sin, cos, radians
-import sys
-sys.path.insert(1,'/home/patrick/pi3d')
+import demo # for development allows loading of pi3d version loaded in user space (see demo.py)
 import pi3d
 import common
 import table
@@ -256,20 +255,24 @@ while DISPLAY.loop_running():
         elif k == 119:        # key 'W' to move camera up
             if CamTilt < MAX_CAM_TILT:
                 CamTilt += 1
+                camera_position = None
         elif k == 115:        # key 'S' to move camera down
             if CamTilt > -90:
                 CamTilt -= 1
+                camera_position = None
         elif k == 97:        # key 'A' to move camera rotate left
             if CamRotation == MAX_CAM_ROTATION_L:
                 CamRotation = 1
             else:
                 CamRotation -= .5
+            camera_position = None
             cue_stick_changed = True
         elif k == 100:        # key 'd' to move rotate right
             if CamRotation == MAX_CAM_ROTATION_R:
                 CamRotation = -1
             else:
                 CamRotation += .5
+            camera_position = None
             cue_stick_changed = True
         elif k == 27:        # key ESC to terminate
             MyKeys.close()

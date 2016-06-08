@@ -23,6 +23,7 @@
 from __future__ import division
 
 import numpy as np
+import demo # for development allows loading of pi3d version loaded in user space (see demo.py)
 import pi3d
 import cmath
 import common
@@ -221,7 +222,6 @@ def cal_cue_impact(a=0, b=0, theta=0, v_cue=1):
     vx = 0.0
     vy = -(f/BilliardBall.ball_mass)*cos_theta
     vz = -(f/BilliardBall.ball_mass)*sin_theta
-    print(BilliardBall.inertia_sphere)
     wx = ((-c*f*sin_theta) + (b*f*cos_theta))/BilliardBall.inertia_sphere
     wy = (a*f*sin_theta)/BilliardBall.inertia_sphere
     wz = (-a*f*cos_theta)/BilliardBall.inertia_sphere
