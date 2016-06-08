@@ -164,7 +164,8 @@ for ball_obj in calculate.PoolBall.instances:
 
 # Initial Input of Cue Stick parameters
 start_shot = StartShot.WAITING
-v_cue = top_back_spin = left_right_spin = cue_angle = 0
+v_cue = top_back_spin = left_right_spin = 0
+cue_angle = 5
 cue_stick_changed = True
 
 # Initial Frame Render
