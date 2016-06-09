@@ -48,7 +48,7 @@ MAX_CAM_TILT = 90
 MAX_V_CUE = 40
 
 # Load display screen
-DISPLAY = pi3d.Display.create(x=100, y=100, samples=2)
+DISPLAY = pi3d.Display.create(x=50, y=50, samples=2)
 
 # Initial Game Type
 table.BilliardTable.set_detail_auto(table_type=table.TableType.POOL, table_size=table.TableSize.EIGHT_FT,
@@ -167,6 +167,14 @@ v_cue = top_back_spin = left_right_spin = 0
 cue_angle = 5
 cue_stick_changed = True
 
+# Create Cue Stick
+cue_stick = pi3d.Triangle(corners=((-0.01, 0.0), (0.0, 0.01), (0.01, 0.0)))
+cue_obj = pi3d.TCone(radiusBot=0.1, radiusTop=0.03, height=4.0, sides=24, cy=-2.0)
+cue_stick.add_child(cue_obj)
+cue_obj.set_material((1.0, 0.5, 0.1))
+cue_obj.set_draw_details(BallShader, [Normtex, Shinetex], 50.0, 0.1, bump_factor=0.3)
+cue_obj.set_alpha(0.75)
+
 # Initial Frame Render
 frame_to_render = []
 render_index = 0
@@ -175,31 +183,36 @@ DISPLAY.frames_per_second = common.NOR_FRAME_PER_SEC
 
 # Create Camera
 CAMERA = pi3d.Camera.instance()
-CamRadius = 45.0  # radius of camera position
+CamRadius = 10.0 # radius of camera position
 CamRotation = 0.0  # rotation of camera
-CamTilt = 0.0  # CamTilt of camera
+CamTilt = 25.0  # CamTilt of camera
 CamEnable = True
 
 # Create key presses (keyboard)
 MyKeys = pi3d.Keyboard()
-camera_position = None
+cam_dist = None
 while DISPLAY.loop_running():
     
+    cue_ball_location = np.array(cue_ball.empty1.unif[0:3])
     # move camera circularly around cue ball 
     if CamEnable:
-        CAMERA.reset()
-        CAMERA.rotateX(-CamTilt)
-        CAMERA.rotateY(CamRotation)
-        camera_target = [(cue_ball.r[common.X_AXIS] * common.DIM_RATIO) +
-                         (CamRadius * sin(radians(CamRotation)) * cos(radians(CamTilt))),
-                         (cue_ball.r[common.Z_AXIS] * common.DIM_RATIO) + (CamRadius * sin(radians(CamTilt))),
-                         (cue_ball.r[common.Y_AXIS] * common.DIM_RATIO) -
-                         (CamRadius * cos(radians(CamRotation)) * cos(radians(CamTilt)))]
-        if camera_position is None:
-          camera_position = camera_target
+        if cam_dist is None:
+            cam_dist = CamRadius
         else:
-          camera_position = [camera_position[i] * 0.85 + camera_target[i] * 0.15 for i in range(3)]
-        CAMERA.position(camera_position)
+            tmp_dist = ((CAMERA.eye - cue_ball_location) ** 2).sum() ** 0.5 # euclidean distance
+            cam_dist = tmp_dist * 0.95 + CamRadius * 0.05 # tweening
+        CAMERA.relocate(CamRotation, -CamTilt, cue_ball_location, [-cam_dist, -cam_dist, -cam_dist])
+
+    # move cue stick around cue ball
+    if start_shot == StartShot.WAITING:
+        cue_stick.position(cue_ball_location[0], cue_ball_location[1] - 2.0, cue_ball_location[2])
+        cue_stick.rotateToY(-CamRotation)
+        v_factor = 0.25 + 0.75 * v_cue / MAX_V_CUE
+        table_factor = table.BilliardTable.r / 10.0
+        cue_obj.position(table_factor * -left_right_spin, table_factor * top_back_spin, -0.25 * v_factor)
+        cue_obj.rotateToX(cue_angle * 0.4 + 105.0)
+        cue_obj.set_material((1.5 - v_factor, v_factor * 1.5, 0.6 - v_factor))
+        cue_stick.draw()
 
     TableModel.draw()
     
@@ -251,29 +264,29 @@ while DISPLAY.loop_running():
             if CamRadius < 120:
                 CamRadius += 5
         elif k == 105:        # key 'I' to zoom in
-            if CamRadius >= 5:
+            if CamRadius >= 10:
                 CamRadius -= 5
         elif k == 119:        # key 'W' to move camera up
             if CamTilt < MAX_CAM_TILT:
                 CamTilt += 1
-                camera_position = None
+                cam_dist = None
         elif k == 115:        # key 'S' to move camera down
             if CamTilt > -90:
                 CamTilt -= 1
-                camera_position = None
+                cam_dist = None
         elif k == 97:        # key 'A' to move camera rotate left
             if CamRotation == MAX_CAM_ROTATION_L:
                 CamRotation = 1
             else:
                 CamRotation -= .5
-            camera_position = None
+            cam_dist = None
             cue_stick_changed = True
         elif k == 100:        # key 'd' to move rotate right
             if CamRotation == MAX_CAM_ROTATION_R:
                 CamRotation = -1
             else:
                 CamRotation += .5
-            camera_position = None
+            cam_dist = None
             cue_stick_changed = True
         elif k == 27:        # key ESC to terminate
             MyKeys.close()
@@ -352,14 +365,14 @@ while DISPLAY.loop_running():
                 render_index = 0 
             else:
                 start_shot = StartShot.SHOT_INITIATED
-        
+    '''
     if cue_stick_changed:
         print("English", table.BilliardTable.r*left_right_spin/100,
               "Draw/Follow", table.BilliardTable.r*top_back_spin/100,
               "Cue_Velo", v_cue,
               "Cue_Angle", cue_angle,
               "Heading", CamRotation)
-        cue_stick_changed = False
+        cue_stick_changed = False'''
 
     if start_shot == StartShot.SHOT_INITIATED or start_shot == StartShot.AIMING_INITIATED:
         start_time_predict = 0
