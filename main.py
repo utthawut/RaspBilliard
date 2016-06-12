@@ -204,7 +204,7 @@ while DISPLAY.loop_running():
             cam_dist = CamRadius
         else:
             tmp_dist = ((CAMERA.eye - cue_ball_location) ** 2).sum() ** 0.5 # euclidean distance
-            cam_dist = tmp_dist * 0.95 + CamRadius * 0.05 # tweening
+            cam_dist = tmp_dist * 0.98 + CamRadius * 0.02 # tweening
         CAMERA.relocate(CamRotation, -CamTilt, cue_ball_location, [-cam_dist, -cam_dist, -cam_dist])
 
     # move cue stick around cue ball
@@ -226,28 +226,30 @@ while DISPLAY.loop_running():
     # Draw Trajectories
     if start_shot == StartShot.AIMING_READY and len(traject_list) > 0:
         track.draw() 
-        if len(traject_list) < 500:
-            for i in range(500 - len(traject_list)):
-                traject_list.append(traject_list[-1])
-        elif len(traject_list) >= 500:
-            traject_list = traject_list[:500]
+        #if len(traject_list) < 500: # moved to trajectory calculation section below
+        #    for i in range(500 - len(traject_list)):
+        #        traject_list.append(traject_list[-1])
+        #elif len(traject_list) >= 500:
+        #    traject_list = traject_list[:500]
 
-        track.buf[0].re_init(traject_list)
-    else:
-        track.buf[0].re_init(traject_empty_list)
+        #track.buf[0].re_init(traject_list)
+    #else: # expensive job to do every frame!
+    #    track.buf[0].re_init(traject_empty_list)
     
     if start_shot == StartShot.SHOT_READY:
-        for ball_obj_traject in calculate.PoolBall.instances_traject:
-            for ball_obj in calculate.PoolBall.instances:
-                if ball_obj_traject.ball_index == ball_obj.ball_index:
-                    previous_r = ball_obj.r
-                    ball_obj.r = ball_obj_traject.r_to_render[render_index]
-                    # ball_obj.w_roll = ball_obj_traject.w_to_render[render_index]
-                    ball_obj.present_state = ball_obj_traject.state_to_render[render_index]
-                    ball_obj.heading_angle = ball_obj_traject.heading_angle_to_render[render_index]
-                    ball_obj.heading_angle_changed = ball_obj_traject.heading_angle_changed_to_render[render_index]
-                    ball_obj.move_rotate_draw(t=1/frame_to_render[render_index], prev_posit=previous_r)
-                    break
+        for i, ball_obj_traject in enumerate(calculate.PoolBall.instances_traject):
+            # simplify and speed up, works provided instances[i] == instances_traject[i] always
+            #for ball_obj in calculate.PoolBall.instances:
+            #    if ball_obj_traject.ball_index == ball_obj.ball_index:
+            ball_obj = calculate.PoolBall.instances[i]
+            previous_r = ball_obj.r
+            ball_obj.r = ball_obj_traject.r_to_render[render_index]
+            # ball_obj.w_roll = ball_obj_traject.w_to_render[render_index]
+            ball_obj.present_state = ball_obj_traject.state_to_render[render_index]
+            ball_obj.heading_angle = ball_obj_traject.heading_angle_to_render[render_index]
+            ball_obj.heading_angle_changed = ball_obj_traject.heading_angle_changed_to_render[render_index]
+            ball_obj.move_rotate_draw(t=1/frame_to_render[render_index], prev_posit=previous_r)
+            #break
 
         DISPLAY.frames_per_second = frame_to_render[render_index]
         render_index += 1
@@ -474,6 +476,12 @@ while DISPLAY.loop_running():
             start_shot = StartShot.SHOT_READY
         elif start_shot == StartShot.AIMING_INITIATED:
             start_shot = StartShot.AIMING_READY
+            if len(traject_list) < 500: # only need to do this once per f press
+                for i in range(500 - len(traject_list)):
+                    traject_list.append(traject_list[-1])
+            elif len(traject_list) >= 500:
+                traject_list = traject_list[:500]
+            track.buf[0].re_init(traject_list)
         render_index = 0  
         
         if len(traject_list) <= 1:
