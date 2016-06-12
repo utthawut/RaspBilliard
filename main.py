@@ -58,9 +58,10 @@ calculate.BilliardBall.set_mass(common.DEF_BALL_MASS, common.DEF_CUE_MASS)
 calculate.CalConst.initial_constant()
 
 # Create Shader
-BallShader = pi3d.Shader("mat_reflect")
+BallShader = pi3d.Shader("uv_reflect")
 TableShader = BallShader
 ShadowShader = pi3d.Shader("uv_flat")
+Tabletex = pi3d.Texture("media/textures/felt.jpg")
 Normtex = pi3d.Texture("media/textures/grasstile_n.jpg")
 Shinetex = pi3d.Texture("media/textures/photosphere_small.jpg")
 Shadowtex = pi3d.Texture("media/textures/shadow.png")
@@ -68,13 +69,14 @@ Shadowtex = pi3d.Texture("media/textures/shadow.png")
 # Create Light
 light_source = pi3d.Light(
     lightpos=(10, -(table.BilliardTable.table_height+calculate.BilliardBall.r)*common.DIM_RATIO*5.2, 1),
-    lightcol=(0.9, 0.9, 0.8), lightamb=(0.3, 0.3, 0.3), is_point=False)
+    lightcol=(0.9, 0.9, 0.9), lightamb=(0.3, 0.3, 0.3), is_point=False)
 
 # Create Table
 TableModel = pi3d.Model(file_string='media/models/Pool_Table_8ft.obj', name='Table',
                         sx = common.DIM_RATIO, sy=common.DIM_RATIO, sz=common.DIM_RATIO, light=light_source)
-TableModel.set_shader(TableShader)
-TableModel.set_normal_shine(Normtex, 500.0, Shinetex, 0.05, bump_factor=0.1)
+#TableModel.set_shader(TableShader)
+#TableModel.set_normal_shine(Normtex, 500.0, Shinetex, 0.05, bump_factor=0.1)
+TableModel.set_draw_details(TableShader, [Tabletex, Normtex, Shinetex], 500.0, 0.01, 0.1)
 
 # Create Trajectories
 traject_list = [(i*0.1, i*0.1, i*0.1) for i in range(500)]
@@ -156,8 +158,9 @@ pool_ball_9 = calculate.PoolBall(name="Pool_Ball_9", ball_index=9, state=calcula
                                      traject_instance=False, light=light_source)
 
 for ball_obj in calculate.PoolBall.instances:
-    ball_obj.ball_model.set_shader(BallShader)
-    ball_obj.ball_model.set_normal_shine(Normtex, 0.0, Shinetex, 0.1, is_uv=False, bump_factor=0.0)
+    #ball_obj.ball_model.set_shader(BallShader)
+    #ball_obj.ball_model.set_normal_shine(Normtex, 0.0, Shinetex, 0.1, is_uv=False, bump_factor=0.0)
+    ball_obj.ball_model.set_draw_details(BallShader, [ball_obj.tex, Normtex, Shinetex], 0.0, 0.1, bump_factor=0.0)
     ball_obj.shadow.set_draw_details(ShadowShader, [Shadowtex])
 
 

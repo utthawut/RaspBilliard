@@ -431,13 +431,21 @@ class PoolBall(object):
             x_render = r[common.X_AXIS]*common.DIM_RATIO
             y_render = r[common.Z_AXIS]*common.DIM_RATIO
             z_render = r[common.Y_AXIS]*common.DIM_RATIO
-            
+            '''
             self.ball_model = pi3d.Model(
-                self, name=name, file_string='media/models/' + name + '.obj', x=0, y=0, z=0,
+                name=name, file_string='media/models/' + name + '.obj', x=0, y=0, z=0,
                 sx=common.DIM_RATIO, sy=common.DIM_RATIO, sz=common.DIM_RATIO,
                 light=pi3d.Light(
                     lightpos=(0, (table.BilliardTable.table_height+BilliardBall.r)*common.DIM_RATIO*1.5, 0),
                     lightcol=(0.5, 0.5, 0.5), lightamb=(0.5, 0.5, 0.5), is_point=False) if light is None else light)
+            '''
+            self.ball_model = pi3d.Sphere(name=name, radius=common.DEF_BALL_R, slices=32, sides=32,
+            x=0, y=0, z=0, ry=-90, sx=common.DIM_RATIO, sy=common.DIM_RATIO, sz=common.DIM_RATIO,
+                light=pi3d.Light(
+                    lightpos=(0, (table.BilliardTable.table_height+BilliardBall.r)*common.DIM_RATIO*1.5, 0),
+                    lightcol=(0.5, 0.5, 0.5), lightamb=(0.5, 0.5, 0.5), is_point=False) if light is None else light)
+            self.tex = pi3d.Texture('media/textures/{}.png'.format(name))
+            #'''
 
             PoolBall.instances.append(self)  # Register actual instance on the table
             
