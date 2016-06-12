@@ -62,6 +62,7 @@ BallShader = pi3d.Shader("uv_reflect")
 TableShader = BallShader
 ShadowShader = pi3d.Shader("uv_flat")
 Tabletex = pi3d.Texture("media/textures/felt.jpg")
+Cuetex = pi3d.Texture("media/textures/cue_tex.png")
 Normtex = pi3d.Texture("media/textures/grasstile_n.jpg")
 Shinetex = pi3d.Texture("media/textures/photosphere_small.jpg")
 Shadowtex = pi3d.Texture("media/textures/shadow.png")
@@ -175,7 +176,7 @@ cue_stick = pi3d.Triangle(corners=((-0.01, 0.0), (0.0, 0.01), (0.01, 0.0)))
 cue_obj = pi3d.TCone(radiusBot=0.1, radiusTop=0.03, height=4.0, sides=24, cy=-2.0)
 cue_stick.add_child(cue_obj)
 cue_obj.set_material((1.0, 0.5, 0.1))
-cue_obj.set_draw_details(BallShader, [Normtex, Shinetex], 50.0, 0.1, bump_factor=0.3)
+cue_obj.set_draw_details(BallShader, [Cuetex, Normtex, Shinetex], 50.0, 0.1, bump_factor=0.3)
 cue_obj.set_alpha(0.75)
 
 # Initial Frame Render
@@ -214,7 +215,10 @@ while DISPLAY.loop_running():
         table_factor = table.BilliardTable.r / 10.0
         cue_obj.position(table_factor * -left_right_spin, table_factor * top_back_spin, -0.25 * v_factor)
         cue_obj.rotateToX(cue_angle * 0.4 + 105.0)
-        cue_obj.set_material((1.5 - v_factor, v_factor * 1.5, 0.6 - v_factor))
+        cue_obj.rotateToY(360.0 * v_factor)
+        cue_obj.set_material((0.6 - v_factor * 0.2, 
+                              0.4 + v_factor * 0.3, 
+                              0.6 - v_factor * 0.1))
         cue_stick.draw()
 
     TableModel.draw()
@@ -324,7 +328,7 @@ while DISPLAY.loop_running():
             if start_shot != StartShot.SHOT_READY:
                 start_shot = StartShot.WAITING
         # Ball-Centric
-        elif k == 134:      # key up
+        elif k == 259 or k == 134:      # key up
             tmp_top_back_spin = top_back_spin + 2
             if tmp_top_back_spin <= 60:
                 if (((table.BilliardTable.r*tmp_top_back_spin/100)**2 +
@@ -333,7 +337,7 @@ while DISPLAY.loop_running():
                     cue_stick_changed = True
                     if start_shot != StartShot.SHOT_READY:
                         start_shot = StartShot.WAITING
-        elif k == 135:      # key down
+        elif k == 258 or k == 135:      # key down
             tmp_top_back_spin = top_back_spin - 2
             if tmp_top_back_spin >= -60:
                 if (((table.BilliardTable.r*tmp_top_back_spin/100)**2 +
@@ -342,7 +346,7 @@ while DISPLAY.loop_running():
                     cue_stick_changed = True
                     if start_shot != StartShot.SHOT_READY:
                         start_shot = StartShot.WAITING
-        elif k == 136:      # key left
+        elif k == 260 or k == 136:      # key left
             tmp_left_right_spin = left_right_spin + 2
             if tmp_left_right_spin <= 60:
                 if (((table.BilliardTable.r*top_back_spin/100)**2 +
@@ -351,7 +355,7 @@ while DISPLAY.loop_running():
                     cue_stick_changed = True
                     if start_shot != StartShot.SHOT_READY:
                         start_shot = StartShot.WAITING
-        elif k == 137:      # key right
+        elif k == 261 or k == 137:      # key right
             tmp_left_right_spin = left_right_spin - 2
             if tmp_left_right_spin >= -60:
                 if (((table.BilliardTable.r*top_back_spin/100)**2 +
