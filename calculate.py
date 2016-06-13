@@ -76,12 +76,12 @@ class BilliardBall(object):
         cls.r_k_vector = np.array([0, 0, cls.r], dtype = float)
         cls.abs_r = np.linalg.norm(cls.r_k_vector)
         cls.abs_r_square = cls.abs_r * cls.abs_r
-        
+
         if 'ball_mass' in locals():
             cls.inertia_sphere = (2.0 / 5.0) * cls.ball_mass * cls.r_square
         else:
             cls.inertia_sphere = (2.0 / 5.0) * common.DEF_BALL_MASS * cls.r_square
-        
+
     @classmethod
     def set_mass(cls, ball_mass, cue_mass):
         cls.ball_mass = ball_mass
@@ -143,7 +143,7 @@ def cal_angular_velo_vertical(w0_vertical, t):
         w0_vertical_after = (w0_vertical + CalConst.FIVE_SPIN_FRICT_G_DIV_TWO_R*t)
     else:
         return 0
-        
+
     if check_sign(w0_vertical_after) != sign_before:
         return 0
     else:
@@ -154,12 +154,12 @@ def counter_clockwise_vector(vector, heading_angle):
     heading_radians = np.radians(heading_angle)
     cos_data = np.cos(heading_radians)
     sin_data = np.sin(heading_radians)
-    
+
     # if cos_data < common.POS_COSINE_EPSIL and cos_data > common.NEG_COSINE_EPSIL:
     #     cos_data = 0
     # if sin_data < common.POS_COSINE_EPSIL and sin_data > common.NEG_COSINE_EPSIL:
     #     sin_data = 0
- 
+
     rot_matrix = np.array([[cos_data, -sin_data], [sin_data, cos_data]], dtype=float)
 
     return np.dot(rot_matrix, vector.real)
@@ -169,14 +169,14 @@ def clockwise_vector(vector, heading_angle):
     heading_radians = np.radians(heading_angle)
     cos_data = np.cos(heading_radians)
     sin_data = np.sin(heading_radians)
-    
+
     # if cos_data < common.POS_COSINE_EPSIL and cos_data > common.NEG_COSINE_EPSIL:
     #     cos_data = 0
     # if sin_data < common.POS_COSINE_EPSIL and sin_data > common.NEG_COSINE_EPSIL:
     #     sin_data = 0
-    
+
     rot_matrix = np.array([[cos_data, sin_data], [-sin_data, cos_data]], dtype=float)
-    
+
     return np.dot(rot_matrix, vector.real)
 
 
@@ -199,20 +199,20 @@ def cal_cue_impact(a=0, b=0, theta=0, v_cue=1):
     sin_theta = np.sin(radian_of_theta)
     cos_theta = np.cos(radian_of_theta)
     cos_2theta = np.cos(np.radians(2*theta))
-    
+
     # if sin_theta < common.POS_COSINE_EPSIL and sin_theta > common.NEG_COSINE_EPSIL:
     #     sin_theta = 0
     # if cos_theta < common.POS_COSINE_EPSIL and cos_theta > common.NEG_COSINE_EPSIL:
     #     cos_theta = 0
     # if cos_2theta < common.POS_COSINE_EPSIL and cos_2theta > common.NEG_COSINE_EPSIL:
     #     cos_2theta = 0
-    
+
     a_square = a * a
     b_square = b * b
     a_square_plus_b_square = a_square + b_square
     if a_square_plus_b_square > BilliardBall.r_square:
         a = b = a_square = b_square = a_square_plus_b_square = 0
-    
+
     c = np.sqrt(BilliardBall.r_square - a_square_plus_b_square)
 
     f = ((2*BilliardBall.ball_mass*v_cue) /
@@ -225,7 +225,7 @@ def cal_cue_impact(a=0, b=0, theta=0, v_cue=1):
     wx = ((-c*f*sin_theta) + (b*f*cos_theta))/BilliardBall.inertia_sphere
     wy = (a*f*sin_theta)/BilliardBall.inertia_sphere
     wz = (-a*f*cos_theta)/BilliardBall.inertia_sphere
-    
+
     # return (np.array([vx, vy, vz], float), np.array([wx, wy, wz], float))
     # convert axis of Event Base (Paper) to game ball-center axis
     return np.array([vx, -vy, 0], dtype=float), np.array([-wx, -wy, wz], dtype=float)
@@ -250,7 +250,7 @@ def cal_slide_posit(r0, heading_angle, v0, u0_unit, t):
     u0_unit *= (CalConst.ZERO_P_FIVE_SLIDE_FRICT_G*t*t)
     rb = v0 - u0_unit
     rt = counter_clockwise_vector(rb, heading_angle)
-    
+
     return r0 + np.concatenate((rt, [0]))
 
 
@@ -262,9 +262,9 @@ def cal_slide_angular_velo_plane(w0_plane, u0_unit, t):
     if np.linalg.norm(w0_plane) > 0:
         sign_x_before = check_sign(w0_plane.real[common.X_AXIS])
         sign_y_before = check_sign(w0_plane.real[common.Y_AXIS])
-        
+
         w0_plane_after = w0_plane - ((CalConst.FIVE_SPIN_FRICT_G_DIV_TWO_R*t)*np.cross(BilliardBall.k_vector, u0_unit))
-        
+
         if check_sign(w0_plane_after.real[common.X_AXIS]) != sign_x_before:
             w0_plane_after[common.X_AXIS] = 0
         if check_sign(w0_plane_after.real[common.Y_AXIS]) != sign_y_before:
@@ -285,9 +285,9 @@ def cal_roll_posit(r0, heading_angle, v0, v0_unit, t):
 def cal_roll_velo(v0, v0_unit, t):
     sign_x_before = check_sign(v0.real[common.X_AXIS])
     sign_y_before = check_sign(v0.real[common.Y_AXIS])
-    
+
     v0_after = v0 - (CalConst.ROLL_FRICT_G*t*v0_unit)
-    
+
     if check_sign(v0_after.real[common.X_AXIS]) != sign_x_before:
         v0_after[common.X_AXIS] = 0
     if check_sign(v0_after.real[common.Y_AXIS]) != sign_y_before:
@@ -324,7 +324,7 @@ def is_circle_line_segment_intersect(circle_center, start_line, end_line, r):
     else:
         closet_point = (line_vector_unit*project_relative_abs) + start_line
         closet_point_adjust = (line_vector_unit*project_relative_abs*0.90) + start_line
-    
+
     # if epsilon:
     #     # r_tmp = BilliardBall.r_epsilon
     #     r_tmp = BilliardBall.r + 0.0001
@@ -357,17 +357,17 @@ def is_circle_line_segment_intersect2(circle_center, start_line, end_line, epsil
     f = start_line - circle_center
     d_unit = cal_unit_vector(d)
     d_abs = np.linalg.norm(d)
-    
+
     a = np.dot(d, d)
     b = 2*np.dot(d, f)
     c = np.dot(f, f) - r_square_tmp
-    
+
     root = solve.cython_solve_quadratic(a, b, c) if USE_CYTHON else solve_polynomial([a, b, c])
     if 0 >= root <= 1:
         # intersect_point = start_line + roots[i]*d
         intersect_point = start_line + (root*d_abs)*d_unit
         return np.array([intersect_point[common.X_AXIS], intersect_point[common.Y_AXIS], BilliardBall.r], dtype=float)
-                
+
     return None
 
 
@@ -419,7 +419,7 @@ class PoolBall(object):
     def __init__(self, name="", ball_index=0, camera=None, light=None, state=STATIONARY_STATE, heading_angle=0,
                  r=common.ZERO_VECTOR, v=common.ZERO_VECTOR, w=common.ZERO_VECTOR, u=common.ZERO_VECTOR,
                  traject_instance=False):
-    
+
         if traject_instance:
             PoolBall.instances_traject.append(self)  # Register traject_instance for calculating trajectories
             self.r_to_render = []
@@ -448,40 +448,40 @@ class PoolBall(object):
             #'''
 
             PoolBall.instances.append(self)  # Register actual instance on the table
-            
+
             # Create Empty for rotation
             self.empty1 = pi3d.Triangle(corners=((-0.01, 0.0), (0.0, 0.01), (0.01, 0.0)), z=z_render)
-            self.shadow = pi3d.Sprite(h=BilliardBall.r * common.DIM_RATIO * 2.5, 
+            self.shadow = pi3d.Sprite(h=BilliardBall.r * common.DIM_RATIO * 2.5,
                                       w=BilliardBall.r * common.DIM_RATIO * 2.5, rx=90)
             self.empty2 = pi3d.Triangle(corners=((-0.01, 0.0), (0.0, 0.01), (0.01, 0.0)))
             self.empty1.add_child(self.empty2)
             self.empty2.add_child(self.ball_model)
-            
+
             self.empty1.positionX(x_render)
             self.empty1.positionY(y_render)
             self.shadow.positionX(self.empty1.x())
             self.shadow.positionY(self.empty1.y() - BilliardBall.r * common.DIM_RATIO + 0.001 * (1 + len(PoolBall.instances)))
             self.shadow.positionZ(self.empty1.z())
-            
+
         # create new instance variable only on __init__ (Simple is better than complex)
         self.name = name
         self.ball_index = ball_index
         self.previous_state = self.present_state = state
-        
+
         self.r0 = np.copy(r)
         self.r = np.copy(self.r0)
-        
+
         self.v0 = np.copy(v)
         self.v = np.copy(self.v0)
-        
+
         self.w0_plane = np.copy(w)
         self.w_plane = np.copy(self.w0_plane)
-        
+
         self.w0_vertical = self.w_vertical   = self.w0_plane[common.Z_AXIS]
-        
+
         self.u0 = np.copy(u)
         self.u = np.copy(self.u0)
-        
+
         self.u0_unit = cal_unit_vector(self.u0)
         self.v0_unit = cal_unit_vector(self.v0)
 
@@ -490,20 +490,20 @@ class PoolBall(object):
         self.t = 0
         self.heading_angle = heading_angle
         self.heading_angle_changed = False
-        
+
         self.previous_r = np.copy(self.r)
         self.u_direction = np.copy(common.ZERO_VECTOR)
-    
+
         self.previous_sign_w_vertical = self.present_sign_w_vertical = check_sign(self.w0_vertical)
-        
-        # Collision response (per frame)    
+
+        # Collision response (per frame)
         self.ball_collide_remember = []
         self.allow_collide_rail_per_frame = True
         self.potential_ball_collide = False
-        
+
         # Respond sliding (spin effect) only on cue shot
         self.allow_response_sliding = False
-        
+
         # Event Response
         self.event_motion_change = False
         self.event_rail_collide = False
@@ -521,51 +521,51 @@ class PoolBall(object):
                              w=common.ZERO_VECTOR, u=common.ZERO_VECTOR, cue_stick_collide=False):
         self.previous_state = self.present_state = state
         self.r0 = np.copy(self.r)
-        
+
         self.v0 = np.copy(v)
         self.v = np.copy(self.v0)
-        
+
         self.w0_plane = np.copy(w)
         self.w_plane = np.copy(self.w0_plane)
-        
+
         self.w0_vertical = self.w_vertical = self.w0_plane[common.Z_AXIS]
-        
+
         self.u0 = np.copy(u)
         self.u = np.copy(self.u0)
-        
+
         self.u0_unit = cal_unit_vector(self.u0)
         self.v0_unit = cal_unit_vector(self.v0)
 
         # self.w_roll  = np.copy(common.ZERO_VECTOR)
-    
+
         self.t = 0
         self.heading_angle = heading_angle
-        
+
         self.previous_r = np.copy(self.r)
         self.u_direction = np.copy(common.ZERO_VECTOR)
-    
+
         self.previous_sign_w_vertical = self.present_sign_w_vertical = check_sign(self.w0_vertical)
-        
+
         # Respond sliding (spin effect) only on cue shot
         if cue_stick_collide:
             self.allow_response_sliding = True
         else:
             self.allow_response_sliding = False
-        
+
     def copy_ball_to_traject(self):
         del self.__class__.instances_traject[:]
         for ball_obj in self.__class__.instances:
             PoolBall(name=ball_obj.name, ball_index=ball_obj.ball_index, r=ball_obj.r, traject_instance=True)
-    
+
     def move_draw(self):
         self.empty1.positionX(self.r.real[common.X_AXIS]*common.DIM_RATIO)
         self.empty1.positionZ(self.r.real[common.Y_AXIS]*common.DIM_RATIO)
         self.empty1.draw()
-    
-    def move_rotate_draw(self, t, prev_posit):
+
+    def move_rotate(self, t, prev_posit):
         self.empty1.positionX(self.r.real[common.X_AXIS]*common.DIM_RATIO)
         self.empty1.positionZ(self.r.real[common.Y_AXIS]*common.DIM_RATIO)
-        
+
         if self.present_state == ROLLING_STATE:
             dif = self.r - prev_posit  # Current position - Previous position
             distance = np.linalg.norm(dif)  # Magnitude
@@ -583,18 +583,18 @@ class PoolBall(object):
                 # self.empty1.draw()
                 # self.empty1.translateX((self.r.real[common.X_AXIS] - prev_posit.real[common.X_AXIS])*common.DIM_RATIO)
                 # self.empty1.translateZ((self.r.real[common.Y_AXIS] - prev_posit.real[common.Y_AXIS])*common.DIM_RATIO)
-                    
+
                 if self.heading_angle_changed:
                     self.heading_angle_changed = False
                     self.empty1.rotateToY(-self.heading_angle)
                     self.empty2.rotateIncY(self.heading_angle)  # It need to have the Euler angles worked
-                    
+
                 self.empty2.rotateIncX(angle)
 
-        self.empty1.draw()
+        #self.empty1.draw()
         self.shadow.positionX(self.empty1.x())
         self.shadow.positionZ(self.empty1.z())
-        self.shadow.draw()
+        #self.shadow.draw()
 
     def find_time_to_collision(self, find_traject=False):
         global TimeSpeedUp
@@ -602,15 +602,15 @@ class PoolBall(object):
             ball_instances = self.__class__.instances_traject
         else:
             ball_instances = self.__class__.instances
-        
+
         # Initial list variable for storing time prediction
         num_of_ball = len(ball_instances)
         list_time_motion = [common.MAX_TIME]*num_of_ball
         list_time_rail_collide = list_time_motion[:]
         list_time_pock_rail_collide = list_time_motion[:]
         list_time_pock_collide = list_time_motion[:]
-        list_time_ball_collide = [list_time_motion[:] for _ in range(num_of_ball)] 
-            
+        list_time_ball_collide = [list_time_motion[:] for _ in range(num_of_ball)]
+
         t_smallest = common.MAX_TIME
         # Motion-transition
         for ball in ball_instances:
@@ -685,7 +685,7 @@ class PoolBall(object):
 
         return common.NOR_SAMP_PERIOD
 
-    def time_of_motion(self):       
+    def time_of_motion(self):
         t = common.MAX_TIME
         if self.present_state == SLIDING_STATE:
             t = cal_time_slide_end(self.u0) - self.t
@@ -693,7 +693,7 @@ class PoolBall(object):
             t = cal_time_roll_end(self.v0) - self.t
         elif self.present_state == SPINNING_STATE:
             t = cal_time_spin_end(self.w0_vertical) - self.t
-            
+
         if t > 0:
             return t
         else:
@@ -837,7 +837,7 @@ class PoolBall(object):
                 return t        # No choice (should find the problem)
         else:
             return common.MAX_TIME
-        
+
     def time_of_pock_rail_collision(self, t_smallest):
         t = t_smallest
         find_root = False
@@ -861,7 +861,7 @@ class PoolBall(object):
                     if self.is_real_physics_time_pock_rail_collide(root, rail_index):
                         t = root
                         find_root = True
-        
+
         for corner_index, corner_point in enumerate(table.BilliardTable.actual_end_point_pock_rail_all):
             ax = -f_g_divide_2*ux_cos_minus_uy_sin
             ay = -f_g_divide_2*ux_sin_plus_uy_cos
@@ -908,7 +908,7 @@ class PoolBall(object):
         ux_cos_minus_uy_sin = (ux_unit*cos_theta - uy_unit*sin_theta)
         ux_sin_plus_uy_cos = (ux_unit*sin_theta + uy_unit*cos_theta)
         f_g_divide_2 = friction*CalConst.G_DIV_TWO
-        
+
         for pock_index, pock_center in enumerate(table.BilliardTable.actual_pock_center_all):
             ax = -f_g_divide_2*ux_cos_minus_uy_sin
             ay = -f_g_divide_2*ux_sin_plus_uy_cos
@@ -945,7 +945,7 @@ class PoolBall(object):
                 return t
         else:
             return common.MAX_TIME
-    
+
     def prepare_eq_for_solve(self):
         if self.present_state == SLIDING_STATE:
             u_unit = self.u0_unit
@@ -1271,7 +1271,7 @@ class PoolBall(object):
                 w_table_future = common.ZERO_VECTOR
 
         return v_table_future, w_table_future
-        
+
     def prepare_future_incoming_collide_dynamic(self, t):
         if self.present_state == SLIDING_STATE:
             t_to_collide = self.t + t
@@ -1307,7 +1307,7 @@ class PoolBall(object):
     def advance_state(self, t):
         if self.present_state == STATIONARY_STATE:
             return
-    
+
         # Update r, v, w
         self.t = self.t + t
         if self.present_state == SLIDING_STATE:
@@ -1338,14 +1338,14 @@ class PoolBall(object):
             # self.w_roll[common.Z_AXIS] = self.w_vertical
 
     def respond_event(self, find_traject=False, check_event=False):
-        if check_event:  
+        if check_event:
             if find_traject:
                 ball_instances = self.__class__.instances_traject
             else:
                 ball_instances = self.__class__.instances
-            
+
             num_of_active_ball = len(ball_instances)
-            
+
             # MOTION-TRANSITION
             for i, ball in enumerate(ball_instances):
                 ball.allow_collide_rail_per_frame = True
@@ -1355,10 +1355,10 @@ class PoolBall(object):
                 if ball.event_motion_change:
                     ball.event_motion_change = False
                     ball.update_state_change()
-                            
+
             # BALL-COLLISION
             if num_of_active_ball > 1:
-                
+
                 # Response of Event Prediction
                 for i, ball_1 in enumerate(ball_instances):
                     for ball_2 in ball_instances[0:i]:
@@ -1373,7 +1373,7 @@ class PoolBall(object):
                                         ball_2.ball_collide_remember[ball_1.ball_index] = True
                                         ball_1.potential_ball_collide = True
                                         ball_2.potential_ball_collide = True
-                        
+
             # RAIL and POCKET-RAIL COLLISION
             for ball in ball_instances:
                 if ball.event_rail_collide:
@@ -1382,7 +1382,7 @@ class PoolBall(object):
                         rail_collide_index = ball.update_rail_collide()
                         if rail_collide_index is not None:
                             ball.allow_collide_rail_per_frame = False
-                            
+
                 if ball.event_pock_rail_collide:
                     ball.event_pock_rail_collide = False
                     if ball.allow_collide_rail_per_frame:
@@ -1390,20 +1390,20 @@ class PoolBall(object):
                         if pock_rail_collide_index is not None:
                             ball.allow_collide_rail_per_frame = False
 
-            # POCKETED?            
-            for ball in ball_instances: 
+            # POCKETED?
+            for ball in ball_instances:
                 if ball.event_pock_collide:
-                    ball.event_pock_collide = False  
+                    ball.event_pock_collide = False
                     ball.update_pock_collide()
-                
+
         else:
             if find_traject:
                 ball_instances = PoolBall.instances_traject
             else:
                 ball_instances = PoolBall.instances
-            
+
             num_of_active_ball = len(ball_instances)
-            
+
             # MOTION-TRANSITION
             for i, ball in enumerate(ball_instances):
                 ball.allow_collide_rail_per_frame = True
@@ -1413,7 +1413,7 @@ class PoolBall(object):
 
             # BALL-COLLISION
             if num_of_active_ball > 1:
-                
+
                 # Response of Event Prediction
                 for ball_1 in ball_instances:
                     for ball_2 in ball_instances:
@@ -1425,7 +1425,7 @@ class PoolBall(object):
                                         ball_2.ball_collide_remember[ball_1.ball_index] = True
                                         ball_1.potential_ball_collide = True
                                         ball_2.potential_ball_collide = True
-                                        
+
                 # Find response for potential
                 no_new_potential = True
                 while True:
@@ -1441,22 +1441,22 @@ class PoolBall(object):
                                             ball_2.ball_collide_remember[ball_1.ball_index] = True
                                             ball_2.potential_ball_collide = True
                                             no_new_potential = False
-                                            
+
                     if no_new_potential:
                         break
                     else:
-                        no_new_potential = True 
-        
+                        no_new_potential = True
+
             # RAIL and POCKET-RAIL COLLISION
             for ball in ball_instances:
                 if ball.allow_collide_rail_per_frame:
                     if ball.update_rail_collide() or ball.update_pock_rail_collide():
                         ball.allow_collide_rail_per_frame = False
-            
-            # POCKETED?            
-            for ball in ball_instances:        
+
+            # POCKETED?
+            for ball in ball_instances:
                 ball.update_pock_collide()
-            
+
     def is_slide(self, small_epsilon=False):
         if small_epsilon:
             if (abs_exclude_z(self.v) > common.SMALL_POS_EPSIL) and (abs_exclude_z(self.u) > common.SMALL_POS_EPSIL):
@@ -1467,7 +1467,7 @@ class PoolBall(object):
                     (abs_exclude_z(self.u) > common.POS_SLIDE_VELO_EPSIL)):
                 return True
             return False
-    
+
     def is_roll(self, small_epsilon=False):
         if small_epsilon:
             if (abs_exclude_z(self.v) > common.SMALL_POS_EPSIL) and (abs_exclude_z(self.u) <= common.SMALL_POS_EPSIL):
@@ -1478,7 +1478,7 @@ class PoolBall(object):
                     (abs_exclude_z(self.u) <= common.POS_SLIDE_VELO_EPSIL)):
                 return True
             return False
-    
+
     def is_spin(self, small_epsilon=False):
         if self.is_slide() or self.is_roll():
             return False
@@ -1518,7 +1518,7 @@ class PoolBall(object):
         else:  # w_vertical already got 0 (Sign changed)
             self.w_vertical = 0
             return False
-    
+
     def is_stationary(self, small_epsilon = False):
         if small_epsilon:
             if ((abs_exclude_z(self.v) <= common.SMALL_POS_EPSIL) and
@@ -1533,7 +1533,7 @@ class PoolBall(object):
                     (self.is_spin() == False)):
                 return True
             return False
-            
+
     def update_state_change(self):
         if self.present_state == SLIDING_STATE:
             if self.is_roll():
@@ -1586,7 +1586,7 @@ class PoolBall(object):
                 self.r0 = np.copy(self.r)
                 self.t = 0
                 # print("Motion Response", self.name)
-    
+
     def update_state_collide(self):
         if self.is_slide():
             if self.present_state != SLIDING_STATE:
@@ -1623,14 +1623,14 @@ class PoolBall(object):
             # Find penetration  # no need because It's already perform collision prediction
             # distance = np.sqrt(distance_square)
             # penetration = BilliardBall.sum_r - distance
-                
+
             collision_normal_unit = cal_unit_vector(collision_normal)
 
             # collision point is average of penetration
             # collision_point = 0.5*(self.r + BilliardBall.r*collision_normal_unit) +
             # 0.5*(other.r - BilliardBall.r*collision_normal_unit)
             collision_point = (self.r + other.r)/2
-        
+
             # if penetration > common.POS_EPSIL:
             # Push out by penetration * no need because we already predict collision
             #   self.r  = self.r + (0.5*penetration*collision_normal_unit)
@@ -1646,7 +1646,7 @@ class PoolBall(object):
             relative_velo = ((incoming_velo1 + np.cross(incoming_angular_velo1, r1)) -
                              (incoming_velo2 + np.cross(incoming_angular_velo2, r2)))
             relative_v_dot_n_unit = relative_velo.dot(collision_normal_unit)
-            
+
             if relative_v_dot_n_unit < 0:
                 # Compute Impulse Factor
                 denominator = ((1.0/BilliardBall.ball_mass + 1.0/BilliardBall.ball_mass) *
@@ -1658,11 +1658,11 @@ class PoolBall(object):
                 denominator = denominator + sum_cross.dot(collision_normal_unit)
                 modified_velocity = relative_v_dot_n_unit/denominator
                 j = -(1.0 + BallCollideCoef.restitution_coef_ball)*modified_velocity
-                
+
                 # Find Tangential vector
                 collision_tangent = np.cross(np.cross(collision_normal_unit, relative_velo), collision_normal_unit)
                 collision_tangent_unit = cal_unit_vector(collision_tangent)
-                         
+
                 if abs(relative_velo.dot(collision_tangent_unit)) > 0:
                     # Tangent dominated
                     # Calculate commonly used data
@@ -1670,11 +1670,11 @@ class PoolBall(object):
                                     ((BallFrict.friction_coef_ball*j)*collision_tangent_unit))
                     minus_impulse = ((-j*collision_normal_unit) +
                                      ((BallFrict.friction_coef_ball*j)*collision_tangent_unit))
-                    
-                    # Update linear velocity 
+
+                    # Update linear velocity
                     incoming_velo1 = incoming_velo1 + (plus_impulse/BilliardBall.ball_mass)
                     incoming_velo2 = incoming_velo2 + (minus_impulse/BilliardBall.ball_mass)
-                    
+
                     # Update angular velocity
                     incoming_angular_velo1 = (incoming_angular_velo1 +
                                               (np.cross(r1, plus_impulse)/BilliardBall.inertia_sphere))
@@ -1682,10 +1682,10 @@ class PoolBall(object):
                                               (np.cross(r2, minus_impulse)/BilliardBall.inertia_sphere))
                 else:
                     # No tangent
-                    # Update linear velocity 
+                    # Update linear velocity
                     incoming_velo1 = incoming_velo1 + ((j*collision_normal_unit)/BilliardBall.ball_mass)
                     incoming_velo2 = incoming_velo2 - ((j*collision_normal_unit)/BilliardBall.ball_mass)
-                    
+
                     # Update angular velocity
                     incoming_angular_velo1 = (incoming_angular_velo1 +
                                               (np.cross(r1, j*collision_normal_unit)/BilliardBall.inertia_sphere))
@@ -1696,9 +1696,9 @@ class PoolBall(object):
                 self.update_outgoing_ball_collide(incoming_velo1, incoming_angular_velo1)
                 other.update_outgoing_ball_collide(incoming_velo2, incoming_angular_velo2)
                 return True
-                
+
         return False
-                
+
     def update_rail_collide(self):
         collision_index = None
         if ((self.r[common.X_AXIS] < table.BilliardTable.left_rail_r_epsil) and
@@ -1735,13 +1735,13 @@ class PoolBall(object):
             collision_index = table.RailIndex.BOTTOM
         else:
             return collision_index
-            
-        r = collision_point - self.r    
+
+        r = collision_point - self.r
         incoming_velo, incoming_angular_velo = self.prepare_incoming_rail_collide()
         relative_velo = incoming_velo + np.cross(incoming_angular_velo, r)
 
         relative_v_dot_n_unit = relative_velo.dot(collision_normal_unit)
-            
+
         if relative_v_dot_n_unit < 0:
             # Compute Impulse
             if self.present_state == ROLLING_STATE or (not self.allow_response_sliding):
@@ -1754,7 +1754,7 @@ class PoolBall(object):
                  ((1.0/BilliardBall.ball_mass) +
                   collision_normal_unit.dot(
                       np.cross(np.cross(r, collision_normal_unit)/BilliardBall.inertia_sphere, r))))
-            
+
             # Find Tangential vector
             collision_tangent = np.cross(np.cross(collision_normal_unit, relative_velo), collision_normal_unit)
 
@@ -1763,23 +1763,23 @@ class PoolBall(object):
             collision_tangent[common.Y_AXIS] = -collision_tangent[common.Y_AXIS]
             collision_tangent[common.Z_AXIS] = -collision_tangent[common.Z_AXIS]
             collision_tangent_unit = cal_unit_vector(collision_tangent)
-            
+
             if abs(relative_velo.dot(collision_tangent_unit)) > 0:
                 # Tangent dominated
                 # Calculate commonly used data
                 plus_impulse = (j*collision_normal_unit) + ((BallFrict.friction_coef_rail*j)*collision_tangent_unit)
-                # Update linear velocity 
+                # Update linear velocity
                 incoming_velo = incoming_velo + (plus_impulse/BilliardBall.ball_mass)
                 # Update angular velocity
                 incoming_angular_velo = incoming_angular_velo + (np.cross(r, plus_impulse)/BilliardBall.inertia_sphere)
             else:
                 # No tangent
-                # Update linear velocity 
+                # Update linear velocity
                 incoming_velo = incoming_velo + ((j*collision_normal_unit)/BilliardBall.ball_mass)
                 # Update angular velocity
                 incoming_angular_velo = (incoming_angular_velo +
                                          (np.cross(r, j*collision_normal_unit)/BilliardBall.inertia_sphere))
-                    
+
             # Update outcome
             self.update_outgoing_rail_collide(incoming_velo, incoming_angular_velo)
 
@@ -1787,7 +1787,7 @@ class PoolBall(object):
 
         collision_index = None
         return collision_index
-            
+
     def update_pock_rail_collide(self):
         collision_index = None
         collision_point = None
@@ -1803,59 +1803,59 @@ class PoolBall(object):
                 break
         if collision_point is None:
             return collision_index
-        
+
         collision_normal = self.r - collision_point
         collision_normal_unit = cal_unit_vector(collision_normal)
 
-        r = collision_point - self.r    
+        r = collision_point - self.r
         incoming_velo, incoming_angular_velo = self.prepare_incoming_rail_collide()
         relative_velo = incoming_velo + np.cross(incoming_angular_velo, r)
 
         relative_v_dot_n_unit = relative_velo.dot(collision_normal_unit)
-        
+
         if relative_v_dot_n_unit < 0:
             collision_normal = self.r - collision_point_adjust
             collision_normal_unit = cal_unit_vector(collision_normal)
-            r = collision_point_adjust - self.r 
+            r = collision_point_adjust - self.r
             relative_velo = incoming_velo + np.cross(incoming_angular_velo, r)
             relative_v_dot_n_unit = relative_velo.dot(collision_normal_unit)
-            
+
             # Compute Impulse
             j = ((-(1.0 + BallCollideCoef.restitution_coef_cushion) * relative_v_dot_n_unit) /
                  ((1.0/BilliardBall.ball_mass) +
                   collision_normal_unit.dot(
                       np.cross(np.cross(r, collision_normal_unit)/BilliardBall.inertia_sphere, r))))
-            
+
             # Find Tangential vector
             collision_tangent = np.cross(np.cross(collision_normal_unit, relative_velo), collision_normal_unit)
             # Reverse vector is no need
             # collision_tangent[common.X_AXIS], collision_tangent[common.Y_AXIS], collision_tangent[common.Z_AXIS] =
             # -collision_tangent[common.X_AXIS], -collision_tangent[common.Y_AXIS], -collision_tangent[common.Z_AXIS]
             collision_tangent_unit = cal_unit_vector(collision_tangent)
-            
+
             if abs(relative_velo.dot(collision_tangent_unit)) > 0:
                 # Tangent dominated
                 # Calculate commonly used data
                 plus_impulse = (j*collision_normal_unit) + ((BallFrict.friction_coef_rail*j)*collision_tangent_unit)
-                # Update linear velocity 
+                # Update linear velocity
                 incoming_velo = incoming_velo + (plus_impulse/BilliardBall.ball_mass)
                 # Update angular velocity
                 incoming_angular_velo = incoming_angular_velo + (np.cross(r, plus_impulse)/BilliardBall.inertia_sphere)
             else:
                 # No tangent
-                # Update linear velocity 
+                # Update linear velocity
                 incoming_velo = incoming_velo + ((j*collision_normal_unit)/BilliardBall.ball_mass)
                 # Update angular velocity
                 incoming_angular_velo = incoming_angular_velo + (np.cross(r, j*collision_normal_unit) /
                                                                  BilliardBall.inertia_sphere)
-                
+
             # Update outcome
             self.update_outgoing_rail_collide(incoming_velo, incoming_angular_velo)
             return collision_index
 
         collision_index = None
         return collision_index
-            
+
     def update_pock_collide(self):
         for pock_center in table.BilliardTable.actual_pock_center_all:
             collision_normal = self.r - pock_center
@@ -1870,9 +1870,9 @@ class PoolBall(object):
                                                                                        BilliardBall.r)
                 # print("Pocket Response Ball Name:", self.name)
                 return True
-                
+
         return False
-            
+
     def prepare_incoming_ball_collide(self):
         if self.present_state == SLIDING_STATE:
             # return (np.concatenate((counter_clockwise_vector(np.delete(self.u, common.Z_AXIS), self.heading_angle),
@@ -1946,7 +1946,7 @@ class PoolBall(object):
         # w = collide_w, u = collide_u)
 
         # self.update_state_collide()
-        
+
         collide_heading_angle = ((np.degrees(np.arctan2([velo[common.Y_AXIS].real], [velo[common.X_AXIS].real])[0]) +
                                   270) % 360)
         collide_v = np.array([0, abs_exclude_z(velo), 0], dtype=float)
@@ -1957,7 +1957,7 @@ class PoolBall(object):
 
         # collide_w = np.concatenate((clockwise_vector(np.delete(angular_velo, common.Z_AXIS),
         # collide_heading_angle)*0.7, [angular_velo[common.Z_AXIS]]))   # Decrease English effect should be performed?
-        
+
         if self.present_state == SLIDING_STATE and self.allow_response_sliding:
             self.allow_response_sliding = False
             # collide_u = cal_relative_velo_impact(velo, angular_velo)
@@ -1969,7 +1969,7 @@ class PoolBall(object):
         else:
             collide_w = common.ZERO_VECTOR
             collide_u = common.ZERO_VECTOR
-        
+
         self.init_collide_outcome(state=STATIONARY_STATE, heading_angle=collide_heading_angle, v=collide_v,
                                   w=collide_w, u=collide_u)
         self.update_state_collide()
@@ -2006,7 +2006,7 @@ class PoolBall(object):
             collide_w = common.ZERO_VECTOR
             # collide_w[common.Z_AXIS] = angular_velo[common.Z_AXIS]
             collide_u = common.ZERO_VECTOR
-            
+
         self.init_collide_outcome(state=STATIONARY_STATE, heading_angle=collide_heading_angle, v=collide_v,
                                   w=collide_w, u=collide_u)
         self.update_state_collide()

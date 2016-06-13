@@ -182,12 +182,12 @@ cue_obj.set_alpha(0.75)
 # Initial Frame Render
 frame_to_render = []
 render_index = 0
-DrawBallFirstTime = True  # Need to fix this
+#DrawBallFirstTime = True  # Need to fix this
 DISPLAY.frames_per_second = common.NOR_FRAME_PER_SEC
 
 # Create Camera
 CAMERA = pi3d.Camera.instance()
-CamRadius = 10.0 # radius of camera position
+CamRadius = 15.0 # radius of camera position
 CamRotation = 0.0  # rotation of camera
 CamTilt = 25.0  # CamTilt of camera
 CamEnable = True
@@ -196,9 +196,9 @@ CamEnable = True
 MyKeys = pi3d.Keyboard()
 cam_dist = None
 while DISPLAY.loop_running():
-    
+
     cue_ball_location = np.array(cue_ball.empty1.unif[0:3])
-    # move camera circularly around cue ball 
+    # move camera circularly around cue ball
     if CamEnable:
         if cam_dist is None:
             cam_dist = CamRadius
@@ -216,16 +216,16 @@ while DISPLAY.loop_running():
         cue_obj.position(table_factor * -left_right_spin, table_factor * top_back_spin, -0.25 * v_factor)
         cue_obj.rotateToX(cue_angle * 0.4 + 105.0)
         cue_obj.rotateToY(360.0 * v_factor)
-        cue_obj.set_material((0.6 - v_factor * 0.2, 
-                              0.4 + v_factor * 0.3, 
+        cue_obj.set_material((0.6 - v_factor * 0.2,
+                              0.4 + v_factor * 0.3,
                               0.6 - v_factor * 0.1))
         cue_stick.draw()
 
     TableModel.draw()
-    
+
     # Draw Trajectories
     if start_shot == StartShot.AIMING_READY and len(traject_list) > 0:
-        track.draw() 
+        track.draw()
         #if len(traject_list) < 500: # moved to trajectory calculation section below
         #    for i in range(500 - len(traject_list)):
         #        traject_list.append(traject_list[-1])
@@ -235,36 +235,40 @@ while DISPLAY.loop_running():
         #track.buf[0].re_init(traject_list)
     #else: # expensive job to do every frame!
     #    track.buf[0].re_init(traject_empty_list)
-    
-    if start_shot == StartShot.SHOT_READY:
-        for i, ball_obj_traject in enumerate(calculate.PoolBall.instances_traject):
-            # simplify and speed up, works provided instances[i] == instances_traject[i] always
-            #for ball_obj in calculate.PoolBall.instances:
-            #    if ball_obj_traject.ball_index == ball_obj.ball_index:
-            ball_obj = calculate.PoolBall.instances[i]
-            previous_r = ball_obj.r
-            ball_obj.r = ball_obj_traject.r_to_render[render_index]
-            # ball_obj.w_roll = ball_obj_traject.w_to_render[render_index]
-            ball_obj.present_state = ball_obj_traject.state_to_render[render_index]
-            ball_obj.heading_angle = ball_obj_traject.heading_angle_to_render[render_index]
-            ball_obj.heading_angle_changed = ball_obj_traject.heading_angle_changed_to_render[render_index]
-            ball_obj.move_rotate_draw(t=1/frame_to_render[render_index], prev_posit=previous_r)
-            #break
 
-        DISPLAY.frames_per_second = frame_to_render[render_index]
-        render_index += 1
-        if render_index >= len(frame_to_render):         
-            start_shot = StartShot.WAITING
-    else:
-        if DrawBallFirstTime:
-            for ball_obj in calculate.PoolBall.instances:
-                ball_obj.move_draw()
-                ball_obj.shadow.draw()
-            DrawBallFirstTime = True
-        else:
-            for ball_obj in calculate.PoolBall.instances:
-                ball_obj.empty1.draw()
-                ball_obj.shadow.draw()
+    if start_shot == StartShot.SHOT_READY:
+        sum_del_t = 0.0
+        while sum_del_t < common.NOR_SAMP_PERIOD:# and render_index < (len(frame_to_render) - 1):
+            sum_del_t += 1.0 / frame_to_render[render_index]
+            for i, ball_obj_traject in enumerate(calculate.PoolBall.instances_traject):
+                # simplify and speed up, works provided instances[i] == instances_traject[i] always
+                #for ball_obj in calculate.PoolBall.instances:
+                #    if ball_obj_traject.ball_index == ball_obj.ball_index:
+                ball_obj = calculate.PoolBall.instances[i]
+                previous_r = ball_obj.r
+                ball_obj.r = ball_obj_traject.r_to_render[render_index]
+                # ball_obj.w_roll = ball_obj_traject.w_to_render[render_index]
+                ball_obj.present_state = ball_obj_traject.state_to_render[render_index]
+                ball_obj.heading_angle = ball_obj_traject.heading_angle_to_render[render_index]
+                ball_obj.heading_angle_changed = ball_obj_traject.heading_angle_changed_to_render[render_index]
+                #ball_obj.move_rotate(t=sum_del_t, prev_posit=previous_r)
+                ball_obj.move_rotate(t=1.0/frame_to_render[render_index], prev_posit=previous_r)
+
+            #DISPLAY.frames_per_second = frame_to_render[render_index]
+            render_index += 1
+            if render_index >= len(frame_to_render):
+                start_shot = StartShot.WAITING
+                break
+    #else:
+    #    if DrawBallFirstTime:
+    #        for ball_obj in calculate.PoolBall.instances:
+    #            ball_obj.move_draw()
+    #            ball_obj.shadow.draw()
+    #        DrawBallFirstTime = True
+    #    else:
+    for ball_obj in calculate.PoolBall.instances:
+        ball_obj.empty1.draw()
+        ball_obj.shadow.draw()
 
     # Check Keyboard
     k = MyKeys.read()
@@ -371,7 +375,7 @@ while DISPLAY.loop_running():
         elif k == 103:       # key 'G' for shooting
             if start_shot == StartShot.AIMING_READY:
                 start_shot = StartShot.SHOT_READY
-                render_index = 0 
+                render_index = 0
             else:
                 start_shot = StartShot.SHOT_INITIATED
     '''
@@ -390,11 +394,11 @@ while DISPLAY.loop_running():
         traject_list = []
         del frame_to_render [:]
         cue_ball.copy_ball_to_traject()
-        
+
         for ball_obj in calculate.PoolBall.instances_traject:
             if ball_obj.ball_index == 0:  # cue_ball's index = 0
                 cue_ball_traject = ball_obj
-                
+
         v, w = calculate.cal_cue_impact(a=table.BilliardTable.r*left_right_spin/100,
                                             b=table.BilliardTable.r*top_back_spin/100,
                                             theta=cue_angle,
@@ -482,11 +486,13 @@ while DISPLAY.loop_running():
             elif len(traject_list) >= 500:
                 traject_list = traject_list[:500]
             track.buf[0].re_init(traject_list)
-        render_index = 0  
-        
+        render_index = 0
+
         if len(traject_list) <= 1:
             del traject_list[:]
 
         print("*****Time for response:******************", start_time_respond)
         print("*****Time for prediction:******************", start_time_predict)
         print("*****Time for calculation:******************", time.time() - start_time_over)
+        #with open('temp.txt', 'w') as f:
+        #  f.write('number={} list={}'.format(len(frame_to_render), frame_to_render))
