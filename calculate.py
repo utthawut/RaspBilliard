@@ -1541,8 +1541,8 @@ class PoolBall(object):
                 self.present_state = ROLLING_STATE
                 self.r0 = np.copy(self.r)
                 heading_angle_changed = ((np.degrees(
-                    np.arctan2([self.v[common.Y_AXIS].real], [self.v[common.X_AXIS].real])[0]) + 270) % 360)
-                self.heading_angle = (self.heading_angle + heading_angle_changed)%360
+                    np.arctan2([self.v[common.X_AXIS].real], [self.v[common.Y_AXIS].real])[0])))
+                self.heading_angle = (self.heading_angle - heading_angle_changed + 180) % 360 - 180
                 # v[common.X_AXIS] will be unpredictable when curve/spin is performed
                 self.v0 = np.array([0, abs_exclude_z(self.v), 0], dtype=float)
                 self.v = np.copy(self.v0)
