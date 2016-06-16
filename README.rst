@@ -3,6 +3,8 @@ RaspBillard
 The RaspBilliard is Low-cost Virtual Realistic Billiard Simulator, 
 running on Raspberry Pi
 
+[RaspBilliard video](https://www.youtube.com/watch?v=DKvyWfxoGeY)
+
 Acknowledgements
 ====================
 Development of this project would not have been possible without following document and library. 
@@ -57,6 +59,12 @@ To make curve/masse shots
 - key 'j' to elevate cue stick down (decrease angle of cuestick)
 
 
+To Make a shot and aimming
+
+- key 'f' to create aiming line
+- key 'g' to make a shot
+
+
 Concept Overview
 ====================
 The arcade machine/simulator will consist of accelerometer and infrared sensor to measure,
@@ -88,4 +96,3 @@ The arcade machine/simulator will consist of accelerometer and infrared sensor t
    
 Thank you Mr. Theeraphan Upan, he help me write this schemetic. And he will make PCB soon.
 
-[RaspBilliard video](https://www.youtube.com/watch?v=04EXz3RdWic)
