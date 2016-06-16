@@ -1,9 +1,13 @@
-RaspBillard
+RaspBilliard
 ====================
-The RaspBilliard is Low-cost Virtual Realistic Billiard Simulator, 
+The RaspBilliard is Low-cost Virtual Realistic Billiard Simulator/Game, 
 running on Raspberry Pi
 
-[RaspBilliard video](https://www.youtube.com/watch?v=DKvyWfxoGeY)
+RaspBilliard Video
+====================
+- https://www.youtube.com/watch?v=DKvyWfxoGeY
+- https://www.youtube.com/watch?v=ZcX-UJxrW_c
+
 
 Acknowledgements
 ====================
@@ -13,7 +17,7 @@ Development of this project would not have been possible without following docum
 
 2.  POOL PHYSICS SIMULATION BY EVENT PREDICTION II: COLLISIONS http://web.stanford.edu/group/billiards/PoolPhysicsSimulationByEventPrediction2Collisions.pdf  
 
-3.  pi3d <https://github.com/tipam/pi3d>  
+3.  pi3d https://github.com/tipam/pi3d  
 
 
 Dependencies
@@ -25,7 +29,7 @@ Dependencies
 
 Usage
 ====================
-Camera movement and aimming
+Camera movement and aiming
 
 - key 'w' move camera up
 - key 's' move camera down
@@ -59,7 +63,7 @@ To make curve/masse shots
 - key 'j' to elevate cue stick down (decrease angle of cuestick)
 
 
-To Make a shot and aimming
+To Make a shot and aiming line
 
 - key 'f' to create aiming line
 - key 'g' to make a shot
