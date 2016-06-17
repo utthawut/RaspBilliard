@@ -531,6 +531,27 @@ static int __Pyx_ParseOptionalKeywords(PyObject *kwds, PyObject **argnames[],\
     PyObject *kwds2, PyObject *values[], Py_ssize_t num_pos_args,\
     const char* function_name);
 
+#define __Pyx_GetItemInt(o, i, type, is_signed, to_py_func, is_list, wraparound, boundscheck)\
+    (__Pyx_fits_Py_ssize_t(i, type, is_signed) ?\
+    __Pyx_GetItemInt_Fast(o, (Py_ssize_t)i, is_list, wraparound, boundscheck) :\
+    (is_list ? (PyErr_SetString(PyExc_IndexError, "list index out of range"), (PyObject*)NULL) :\
+               __Pyx_GetItemInt_Generic(o, to_py_func(i))))
+#define __Pyx_GetItemInt_List(o, i, type, is_signed, to_py_func, is_list, wraparound, boundscheck)\
+    (__Pyx_fits_Py_ssize_t(i, type, is_signed) ?\
+    __Pyx_GetItemInt_List_Fast(o, (Py_ssize_t)i, wraparound, boundscheck) :\
+    (PyErr_SetString(PyExc_IndexError, "list index out of range"), (PyObject*)NULL))
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_List_Fast(PyObject *o, Py_ssize_t i,
+                                                              int wraparound, int boundscheck);
+#define __Pyx_GetItemInt_Tuple(o, i, type, is_signed, to_py_func, is_list, wraparound, boundscheck)\
+    (__Pyx_fits_Py_ssize_t(i, type, is_signed) ?\
+    __Pyx_GetItemInt_Tuple_Fast(o, (Py_ssize_t)i, wraparound, boundscheck) :\
+    (PyErr_SetString(PyExc_IndexError, "tuple index out of range"), (PyObject*)NULL))
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Tuple_Fast(PyObject *o, Py_ssize_t i,
+                                                              int wraparound, int boundscheck);
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Generic(PyObject *o, PyObject* j);
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Fast(PyObject *o, Py_ssize_t i,
+                                                     int is_list, int wraparound, int boundscheck);
+
 typedef struct {
     int code_line;
     PyCodeObject* code_object;
@@ -564,6 +585,7 @@ static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 int __pyx_module_is_main_solve = 0;
 
 /* Implementation of 'solve' */
+static char __pyx_k_coef[] = "coef";
 static char __pyx_k_main[] = "__main__";
 static char __pyx_k_test[] = "__test__";
 static char __pyx_k_solve[] = "solve";
@@ -572,33 +594,42 @@ static char __pyx_k_coef_b[] = "coef_b";
 static char __pyx_k_coef_c[] = "coef_c";
 static char __pyx_k_coef_d[] = "coef_d";
 static char __pyx_k_coef_e[] = "coef_e";
+static char __pyx_k_coef_len[] = "coef_len";
 static char __pyx_k_cython_solve_cubic[] = "cython_solve_cubic";
+static char __pyx_k_cython_solve_roots[] = "cython_solve_roots";
 static char __pyx_k_cython_solve_quartic[] = "cython_solve_quartic";
 static char __pyx_k_cython_solve_quadratic[] = "cython_solve_quadratic";
-static char __pyx_k_D_Ball_PC_RaspBilliardProject_Bi[] = "D:\\Ball(PC)\\RaspBilliardProject\\Billiard Project_2016-04-12_cython\\raspbilliard\\speedup\\solve.pyx";
-static PyObject *__pyx_kp_s_D_Ball_PC_RaspBilliardProject_Bi;
+static char __pyx_k_D_Ball_PC_RaspBilliardProject_Ra[] = "D:\\Ball(PC)\\RaspBilliardProject\\RaspBilliard_git\\RaspBilliard\\speedup\\solve.pyx";
+static PyObject *__pyx_kp_s_D_Ball_PC_RaspBilliardProject_Ra;
+static PyObject *__pyx_n_s_coef;
 static PyObject *__pyx_n_s_coef_a;
 static PyObject *__pyx_n_s_coef_b;
 static PyObject *__pyx_n_s_coef_c;
 static PyObject *__pyx_n_s_coef_d;
 static PyObject *__pyx_n_s_coef_e;
+static PyObject *__pyx_n_s_coef_len;
 static PyObject *__pyx_n_s_cython_solve_cubic;
 static PyObject *__pyx_n_s_cython_solve_quadratic;
 static PyObject *__pyx_n_s_cython_solve_quartic;
+static PyObject *__pyx_n_s_cython_solve_roots;
 static PyObject *__pyx_n_s_main;
 static PyObject *__pyx_n_s_solve;
 static PyObject *__pyx_n_s_test;
 static PyObject *__pyx_pf_5solve_cython_solve_quartic(CYTHON_UNUSED PyObject *__pyx_self, long double __pyx_v_coef_a, long double __pyx_v_coef_b, long double __pyx_v_coef_c, long double __pyx_v_coef_d, long double __pyx_v_coef_e); /* proto */
 static PyObject *__pyx_pf_5solve_2cython_solve_cubic(CYTHON_UNUSED PyObject *__pyx_self, long double __pyx_v_coef_a, long double __pyx_v_coef_b, long double __pyx_v_coef_c, long double __pyx_v_coef_d); /* proto */
 static PyObject *__pyx_pf_5solve_4cython_solve_quadratic(CYTHON_UNUSED PyObject *__pyx_self, long double __pyx_v_coef_a, long double __pyx_v_coef_b, long double __pyx_v_coef_c); /* proto */
+static PyObject *__pyx_pf_5solve_6cython_solve_roots(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_coef); /* proto */
+static PyObject *__pyx_int_neg_31;
 static PyObject *__pyx_tuple_;
 static PyObject *__pyx_tuple__3;
 static PyObject *__pyx_tuple__5;
+static PyObject *__pyx_tuple__7;
 static PyObject *__pyx_codeobj__2;
 static PyObject *__pyx_codeobj__4;
 static PyObject *__pyx_codeobj__6;
+static PyObject *__pyx_codeobj__8;
 
-/* "solve.pyx":8
+/* "solve.pyx":30
  *     long double solve_quadratic(const long double coef_a, const long double coef_b, const long double coef_c)
  * 
  * def cython_solve_quartic(long double coef_a, long double coef_b, long double coef_c,             # <<<<<<<<<<<<<<
@@ -644,26 +675,26 @@ static PyObject *__pyx_pw_5solve_1cython_solve_quartic(PyObject *__pyx_self, PyO
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_coef_b)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cython_solve_quartic", 1, 5, 5, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 8; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("cython_solve_quartic", 1, 5, 5, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_coef_c)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cython_solve_quartic", 1, 5, 5, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 8; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("cython_solve_quartic", 1, 5, 5, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  3:
         if (likely((values[3] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_coef_d)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cython_solve_quartic", 1, 5, 5, 3); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 8; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("cython_solve_quartic", 1, 5, 5, 3); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  4:
         if (likely((values[4] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_coef_e)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cython_solve_quartic", 1, 5, 5, 4); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 8; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("cython_solve_quartic", 1, 5, 5, 4); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cython_solve_quartic") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 8; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cython_solve_quartic") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 5) {
       goto __pyx_L5_argtuple_error;
@@ -674,15 +705,15 @@ static PyObject *__pyx_pw_5solve_1cython_solve_quartic(PyObject *__pyx_self, PyO
       values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
       values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
     }
-    __pyx_v_coef_a = __pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_coef_a == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 8; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_coef_b = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_coef_b == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 8; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_coef_c = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_coef_c == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 8; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_coef_d = __pyx_PyFloat_AsDouble(values[3]); if (unlikely((__pyx_v_coef_d == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_coef_e = __pyx_PyFloat_AsDouble(values[4]); if (unlikely((__pyx_v_coef_e == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_coef_a = __pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_coef_a == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_coef_b = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_coef_b == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_coef_c = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_coef_c == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_coef_d = __pyx_PyFloat_AsDouble(values[3]); if (unlikely((__pyx_v_coef_d == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 31; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_coef_e = __pyx_PyFloat_AsDouble(values[4]); if (unlikely((__pyx_v_coef_e == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 31; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("cython_solve_quartic", 1, 5, 5, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 8; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("cython_solve_quartic", 1, 5, 5, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("solve.cython_solve_quartic", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -704,7 +735,7 @@ static PyObject *__pyx_pf_5solve_cython_solve_quartic(CYTHON_UNUSED PyObject *__
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("cython_solve_quartic", 0);
 
-  /* "solve.pyx":10
+  /* "solve.pyx":32
  * def cython_solve_quartic(long double coef_a, long double coef_b, long double coef_c,
  *                             long double coef_d, long double coef_e):
  *     return solve_quartic(coef_a, coef_b, coef_c, coef_d, coef_e)             # <<<<<<<<<<<<<<
@@ -712,13 +743,13 @@ static PyObject *__pyx_pf_5solve_cython_solve_quartic(CYTHON_UNUSED PyObject *__
  * def cython_solve_cubic(long double coef_a, long double coef_b, long double coef_c,
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(solve_quartic(__pyx_v_coef_a, __pyx_v_coef_b, __pyx_v_coef_c, __pyx_v_coef_d, __pyx_v_coef_e)); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 10; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyFloat_FromDouble(solve_quartic(__pyx_v_coef_a, __pyx_v_coef_b, __pyx_v_coef_c, __pyx_v_coef_d, __pyx_v_coef_e)); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 32; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "solve.pyx":8
+  /* "solve.pyx":30
  *     long double solve_quadratic(const long double coef_a, const long double coef_b, const long double coef_c)
  * 
  * def cython_solve_quartic(long double coef_a, long double coef_b, long double coef_c,             # <<<<<<<<<<<<<<
@@ -737,7 +768,7 @@ static PyObject *__pyx_pf_5solve_cython_solve_quartic(CYTHON_UNUSED PyObject *__
   return __pyx_r;
 }
 
-/* "solve.pyx":12
+/* "solve.pyx":34
  *     return solve_quartic(coef_a, coef_b, coef_c, coef_d, coef_e)
  * 
  * def cython_solve_cubic(long double coef_a, long double coef_b, long double coef_c,             # <<<<<<<<<<<<<<
@@ -781,21 +812,21 @@ static PyObject *__pyx_pw_5solve_3cython_solve_cubic(PyObject *__pyx_self, PyObj
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_coef_b)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cython_solve_cubic", 1, 4, 4, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 12; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("cython_solve_cubic", 1, 4, 4, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 34; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_coef_c)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cython_solve_cubic", 1, 4, 4, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 12; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("cython_solve_cubic", 1, 4, 4, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 34; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  3:
         if (likely((values[3] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_coef_d)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cython_solve_cubic", 1, 4, 4, 3); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 12; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("cython_solve_cubic", 1, 4, 4, 3); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 34; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cython_solve_cubic") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 12; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cython_solve_cubic") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 34; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 4) {
       goto __pyx_L5_argtuple_error;
@@ -805,14 +836,14 @@ static PyObject *__pyx_pw_5solve_3cython_solve_cubic(PyObject *__pyx_self, PyObj
       values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
       values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
     }
-    __pyx_v_coef_a = __pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_coef_a == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 12; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_coef_b = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_coef_b == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 12; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_coef_c = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_coef_c == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 12; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_coef_d = __pyx_PyFloat_AsDouble(values[3]); if (unlikely((__pyx_v_coef_d == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 13; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_coef_a = __pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_coef_a == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 34; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_coef_b = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_coef_b == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 34; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_coef_c = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_coef_c == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 34; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_coef_d = __pyx_PyFloat_AsDouble(values[3]); if (unlikely((__pyx_v_coef_d == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 35; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("cython_solve_cubic", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 12; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("cython_solve_cubic", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 34; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("solve.cython_solve_cubic", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -834,7 +865,7 @@ static PyObject *__pyx_pf_5solve_2cython_solve_cubic(CYTHON_UNUSED PyObject *__p
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("cython_solve_cubic", 0);
 
-  /* "solve.pyx":14
+  /* "solve.pyx":36
  * def cython_solve_cubic(long double coef_a, long double coef_b, long double coef_c,
  *                         long double coef_d):
  *     return solve_cubic(coef_a, coef_b, coef_c, coef_d)             # <<<<<<<<<<<<<<
@@ -842,13 +873,13 @@ static PyObject *__pyx_pf_5solve_2cython_solve_cubic(CYTHON_UNUSED PyObject *__p
  * def cython_solve_quadratic(long double coef_a, long double coef_b, long double coef_c):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(solve_cubic(__pyx_v_coef_a, __pyx_v_coef_b, __pyx_v_coef_c, __pyx_v_coef_d)); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 14; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyFloat_FromDouble(solve_cubic(__pyx_v_coef_a, __pyx_v_coef_b, __pyx_v_coef_c, __pyx_v_coef_d)); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 36; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "solve.pyx":12
+  /* "solve.pyx":34
  *     return solve_quartic(coef_a, coef_b, coef_c, coef_d, coef_e)
  * 
  * def cython_solve_cubic(long double coef_a, long double coef_b, long double coef_c,             # <<<<<<<<<<<<<<
@@ -867,11 +898,12 @@ static PyObject *__pyx_pf_5solve_2cython_solve_cubic(CYTHON_UNUSED PyObject *__p
   return __pyx_r;
 }
 
-/* "solve.pyx":16
+/* "solve.pyx":38
  *     return solve_cubic(coef_a, coef_b, coef_c, coef_d)
  * 
  * def cython_solve_quadratic(long double coef_a, long double coef_b, long double coef_c):             # <<<<<<<<<<<<<<
  *     return solve_quadratic(coef_a, coef_b, coef_c)
+ * 
  */
 
 /* Python wrapper */
@@ -908,16 +940,16 @@ static PyObject *__pyx_pw_5solve_5cython_solve_quadratic(PyObject *__pyx_self, P
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_coef_b)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cython_solve_quadratic", 1, 3, 3, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 16; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("cython_solve_quadratic", 1, 3, 3, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 38; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_coef_c)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cython_solve_quadratic", 1, 3, 3, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 16; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("cython_solve_quadratic", 1, 3, 3, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 38; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cython_solve_quadratic") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 16; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cython_solve_quadratic") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 38; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 3) {
       goto __pyx_L5_argtuple_error;
@@ -926,13 +958,13 @@ static PyObject *__pyx_pw_5solve_5cython_solve_quadratic(PyObject *__pyx_self, P
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
       values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
     }
-    __pyx_v_coef_a = __pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_coef_a == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 16; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_coef_b = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_coef_b == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 16; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_coef_c = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_coef_c == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 16; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_coef_a = __pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_coef_a == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 38; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_coef_b = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_coef_b == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 38; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_coef_c = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_coef_c == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 38; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("cython_solve_quadratic", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 16; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("cython_solve_quadratic", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 38; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("solve.cython_solve_quadratic", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -954,29 +986,514 @@ static PyObject *__pyx_pf_5solve_4cython_solve_quadratic(CYTHON_UNUSED PyObject 
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("cython_solve_quadratic", 0);
 
-  /* "solve.pyx":17
+  /* "solve.pyx":39
  * 
  * def cython_solve_quadratic(long double coef_a, long double coef_b, long double coef_c):
  *     return solve_quadratic(coef_a, coef_b, coef_c)             # <<<<<<<<<<<<<<
+ * 
+ * def cython_solve_roots(coef):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(solve_quadratic(__pyx_v_coef_a, __pyx_v_coef_b, __pyx_v_coef_c)); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 17; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyFloat_FromDouble(solve_quadratic(__pyx_v_coef_a, __pyx_v_coef_b, __pyx_v_coef_c)); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 39; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "solve.pyx":16
+  /* "solve.pyx":38
  *     return solve_cubic(coef_a, coef_b, coef_c, coef_d)
  * 
  * def cython_solve_quadratic(long double coef_a, long double coef_b, long double coef_c):             # <<<<<<<<<<<<<<
  *     return solve_quadratic(coef_a, coef_b, coef_c)
+ * 
  */
 
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_AddTraceback("solve.cython_solve_quadratic", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "solve.pyx":41
+ *     return solve_quadratic(coef_a, coef_b, coef_c)
+ * 
+ * def cython_solve_roots(coef):             # <<<<<<<<<<<<<<
+ *     cdef:
+ *         unsigned char coef_len = len(coef);
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_5solve_7cython_solve_roots(PyObject *__pyx_self, PyObject *__pyx_v_coef); /*proto*/
+static PyMethodDef __pyx_mdef_5solve_7cython_solve_roots = {"cython_solve_roots", (PyCFunction)__pyx_pw_5solve_7cython_solve_roots, METH_O, 0};
+static PyObject *__pyx_pw_5solve_7cython_solve_roots(PyObject *__pyx_self, PyObject *__pyx_v_coef) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("cython_solve_roots (wrapper)", 0);
+  __pyx_r = __pyx_pf_5solve_6cython_solve_roots(__pyx_self, ((PyObject *)__pyx_v_coef));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_5solve_6cython_solve_roots(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_coef) {
+  unsigned char __pyx_v_coef_len;
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  Py_ssize_t __pyx_t_1;
+  PyObject *__pyx_t_2 = NULL;
+  int __pyx_t_3;
+  long double __pyx_t_4;
+  long double __pyx_t_5;
+  long double __pyx_t_6;
+  long double __pyx_t_7;
+  long double __pyx_t_8;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("cython_solve_roots", 0);
+
+  /* "solve.pyx":43
+ * def cython_solve_roots(coef):
+ *     cdef:
+ *         unsigned char coef_len = len(coef);             # <<<<<<<<<<<<<<
+ * 
+ *     if coef_len == 5:
+ */
+  __pyx_t_1 = PyObject_Length(__pyx_v_coef); if (unlikely(__pyx_t_1 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 43; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_v_coef_len = __pyx_t_1;
+
+  /* "solve.pyx":45
+ *         unsigned char coef_len = len(coef);
+ * 
+ *     if coef_len == 5:             # <<<<<<<<<<<<<<
+ *         # This below mess checking will solve faster and compatible with numpy.roots
+ *         if coef[0]:
+ */
+  switch (__pyx_v_coef_len) {
+    case 5:
+
+    /* "solve.pyx":47
+ *     if coef_len == 5:
+ *         # This below mess checking will solve faster and compatible with numpy.roots
+ *         if coef[0]:             # <<<<<<<<<<<<<<
+ *             return solve_quartic(coef[0], coef[1], coef[2], coef[3], coef[4])
+ *         elif coef[1]:
+ */
+    __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_coef, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(__pyx_t_2 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 47; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+    __Pyx_GOTREF(__pyx_t_2);
+    __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_3 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 47; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    if (__pyx_t_3) {
+
+      /* "solve.pyx":48
+ *         # This below mess checking will solve faster and compatible with numpy.roots
+ *         if coef[0]:
+ *             return solve_quartic(coef[0], coef[1], coef[2], coef[3], coef[4])             # <<<<<<<<<<<<<<
+ *         elif coef[1]:
+ *             return solve_cubic(coef[0], coef[1], coef[2], coef[3])
+ */
+      __Pyx_XDECREF(__pyx_r);
+      __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_coef, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(__pyx_t_2 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+      __Pyx_GOTREF(__pyx_t_2);
+      __pyx_t_4 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_4 == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+      __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_coef, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(__pyx_t_2 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+      __Pyx_GOTREF(__pyx_t_2);
+      __pyx_t_5 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_5 == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+      __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_coef, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(__pyx_t_2 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+      __Pyx_GOTREF(__pyx_t_2);
+      __pyx_t_6 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_6 == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+      __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_coef, 3, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(__pyx_t_2 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+      __Pyx_GOTREF(__pyx_t_2);
+      __pyx_t_7 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_7 == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+      __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_coef, 4, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(__pyx_t_2 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+      __Pyx_GOTREF(__pyx_t_2);
+      __pyx_t_8 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_8 == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+      __pyx_t_2 = PyFloat_FromDouble(solve_quartic(__pyx_t_4, __pyx_t_5, __pyx_t_6, __pyx_t_7, __pyx_t_8)); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_GOTREF(__pyx_t_2);
+      __pyx_r = __pyx_t_2;
+      __pyx_t_2 = 0;
+      goto __pyx_L0;
+
+      /* "solve.pyx":47
+ *     if coef_len == 5:
+ *         # This below mess checking will solve faster and compatible with numpy.roots
+ *         if coef[0]:             # <<<<<<<<<<<<<<
+ *             return solve_quartic(coef[0], coef[1], coef[2], coef[3], coef[4])
+ *         elif coef[1]:
+ */
+    }
+
+    /* "solve.pyx":49
+ *         if coef[0]:
+ *             return solve_quartic(coef[0], coef[1], coef[2], coef[3], coef[4])
+ *         elif coef[1]:             # <<<<<<<<<<<<<<
+ *             return solve_cubic(coef[0], coef[1], coef[2], coef[3])
+ *         elif coef[2]:
+ */
+    __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_coef, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(__pyx_t_2 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 49; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+    __Pyx_GOTREF(__pyx_t_2);
+    __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_3 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 49; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    if (__pyx_t_3) {
+
+      /* "solve.pyx":50
+ *             return solve_quartic(coef[0], coef[1], coef[2], coef[3], coef[4])
+ *         elif coef[1]:
+ *             return solve_cubic(coef[0], coef[1], coef[2], coef[3])             # <<<<<<<<<<<<<<
+ *         elif coef[2]:
+ *             return solve_quadratic(coef[0], coef[1], coef[2])
+ */
+      __Pyx_XDECREF(__pyx_r);
+      __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_coef, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(__pyx_t_2 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 50; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+      __Pyx_GOTREF(__pyx_t_2);
+      __pyx_t_8 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_8 == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 50; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+      __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_coef, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(__pyx_t_2 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 50; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+      __Pyx_GOTREF(__pyx_t_2);
+      __pyx_t_7 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_7 == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 50; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+      __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_coef, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(__pyx_t_2 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 50; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+      __Pyx_GOTREF(__pyx_t_2);
+      __pyx_t_6 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_6 == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 50; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+      __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_coef, 3, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(__pyx_t_2 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 50; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+      __Pyx_GOTREF(__pyx_t_2);
+      __pyx_t_5 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_5 == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 50; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+      __pyx_t_2 = PyFloat_FromDouble(solve_cubic(__pyx_t_8, __pyx_t_7, __pyx_t_6, __pyx_t_5)); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 50; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_GOTREF(__pyx_t_2);
+      __pyx_r = __pyx_t_2;
+      __pyx_t_2 = 0;
+      goto __pyx_L0;
+
+      /* "solve.pyx":49
+ *         if coef[0]:
+ *             return solve_quartic(coef[0], coef[1], coef[2], coef[3], coef[4])
+ *         elif coef[1]:             # <<<<<<<<<<<<<<
+ *             return solve_cubic(coef[0], coef[1], coef[2], coef[3])
+ *         elif coef[2]:
+ */
+    }
+
+    /* "solve.pyx":51
+ *         elif coef[1]:
+ *             return solve_cubic(coef[0], coef[1], coef[2], coef[3])
+ *         elif coef[2]:             # <<<<<<<<<<<<<<
+ *             return solve_quadratic(coef[0], coef[1], coef[2])
+ *         else:
+ */
+    __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_coef, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(__pyx_t_2 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 51; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+    __Pyx_GOTREF(__pyx_t_2);
+    __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_3 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 51; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    if (__pyx_t_3) {
+
+      /* "solve.pyx":52
+ *             return solve_cubic(coef[0], coef[1], coef[2], coef[3])
+ *         elif coef[2]:
+ *             return solve_quadratic(coef[0], coef[1], coef[2])             # <<<<<<<<<<<<<<
+ *         else:
+ *             return -31  # No need to solve, ho-hum
+ */
+      __Pyx_XDECREF(__pyx_r);
+      __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_coef, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(__pyx_t_2 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 52; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+      __Pyx_GOTREF(__pyx_t_2);
+      __pyx_t_5 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_5 == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 52; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+      __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_coef, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(__pyx_t_2 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 52; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+      __Pyx_GOTREF(__pyx_t_2);
+      __pyx_t_6 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_6 == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 52; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+      __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_coef, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(__pyx_t_2 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 52; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+      __Pyx_GOTREF(__pyx_t_2);
+      __pyx_t_7 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_7 == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 52; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+      __pyx_t_2 = PyFloat_FromDouble(solve_quadratic(__pyx_t_5, __pyx_t_6, __pyx_t_7)); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 52; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_GOTREF(__pyx_t_2);
+      __pyx_r = __pyx_t_2;
+      __pyx_t_2 = 0;
+      goto __pyx_L0;
+
+      /* "solve.pyx":51
+ *         elif coef[1]:
+ *             return solve_cubic(coef[0], coef[1], coef[2], coef[3])
+ *         elif coef[2]:             # <<<<<<<<<<<<<<
+ *             return solve_quadratic(coef[0], coef[1], coef[2])
+ *         else:
+ */
+    }
+
+    /* "solve.pyx":54
+ *             return solve_quadratic(coef[0], coef[1], coef[2])
+ *         else:
+ *             return -31  # No need to solve, ho-hum             # <<<<<<<<<<<<<<
+ *     elif coef_len == 4:
+ *         if coef[0]:
+ */
+    /*else*/ {
+      __Pyx_XDECREF(__pyx_r);
+      __Pyx_INCREF(__pyx_int_neg_31);
+      __pyx_r = __pyx_int_neg_31;
+      goto __pyx_L0;
+    }
+
+    /* "solve.pyx":45
+ *         unsigned char coef_len = len(coef);
+ * 
+ *     if coef_len == 5:             # <<<<<<<<<<<<<<
+ *         # This below mess checking will solve faster and compatible with numpy.roots
+ *         if coef[0]:
+ */
+    break;
+
+    /* "solve.pyx":55
+ *         else:
+ *             return -31  # No need to solve, ho-hum
+ *     elif coef_len == 4:             # <<<<<<<<<<<<<<
+ *         if coef[0]:
+ *             return solve_cubic(coef[0], coef[1], coef[2], coef[3])
+ */
+    case 4:
+
+    /* "solve.pyx":56
+ *             return -31  # No need to solve, ho-hum
+ *     elif coef_len == 4:
+ *         if coef[0]:             # <<<<<<<<<<<<<<
+ *             return solve_cubic(coef[0], coef[1], coef[2], coef[3])
+ *         elif coef[1]:
+ */
+    __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_coef, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(__pyx_t_2 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 56; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+    __Pyx_GOTREF(__pyx_t_2);
+    __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_3 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 56; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    if (__pyx_t_3) {
+
+      /* "solve.pyx":57
+ *     elif coef_len == 4:
+ *         if coef[0]:
+ *             return solve_cubic(coef[0], coef[1], coef[2], coef[3])             # <<<<<<<<<<<<<<
+ *         elif coef[1]:
+ *             return solve_quadratic(coef[0], coef[1], coef[2])
+ */
+      __Pyx_XDECREF(__pyx_r);
+      __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_coef, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(__pyx_t_2 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+      __Pyx_GOTREF(__pyx_t_2);
+      __pyx_t_7 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_7 == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+      __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_coef, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(__pyx_t_2 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+      __Pyx_GOTREF(__pyx_t_2);
+      __pyx_t_6 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_6 == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+      __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_coef, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(__pyx_t_2 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+      __Pyx_GOTREF(__pyx_t_2);
+      __pyx_t_5 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_5 == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+      __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_coef, 3, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(__pyx_t_2 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+      __Pyx_GOTREF(__pyx_t_2);
+      __pyx_t_8 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_8 == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+      __pyx_t_2 = PyFloat_FromDouble(solve_cubic(__pyx_t_7, __pyx_t_6, __pyx_t_5, __pyx_t_8)); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_GOTREF(__pyx_t_2);
+      __pyx_r = __pyx_t_2;
+      __pyx_t_2 = 0;
+      goto __pyx_L0;
+
+      /* "solve.pyx":56
+ *             return -31  # No need to solve, ho-hum
+ *     elif coef_len == 4:
+ *         if coef[0]:             # <<<<<<<<<<<<<<
+ *             return solve_cubic(coef[0], coef[1], coef[2], coef[3])
+ *         elif coef[1]:
+ */
+    }
+
+    /* "solve.pyx":58
+ *         if coef[0]:
+ *             return solve_cubic(coef[0], coef[1], coef[2], coef[3])
+ *         elif coef[1]:             # <<<<<<<<<<<<<<
+ *             return solve_quadratic(coef[0], coef[1], coef[2])
+ *         else:
+ */
+    __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_coef, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(__pyx_t_2 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 58; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+    __Pyx_GOTREF(__pyx_t_2);
+    __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_3 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 58; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    if (__pyx_t_3) {
+
+      /* "solve.pyx":59
+ *             return solve_cubic(coef[0], coef[1], coef[2], coef[3])
+ *         elif coef[1]:
+ *             return solve_quadratic(coef[0], coef[1], coef[2])             # <<<<<<<<<<<<<<
+ *         else:
+ *             return -31  # No need to solve, ho-hum
+ */
+      __Pyx_XDECREF(__pyx_r);
+      __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_coef, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(__pyx_t_2 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 59; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+      __Pyx_GOTREF(__pyx_t_2);
+      __pyx_t_8 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_8 == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 59; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+      __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_coef, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(__pyx_t_2 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 59; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+      __Pyx_GOTREF(__pyx_t_2);
+      __pyx_t_5 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_5 == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 59; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+      __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_coef, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(__pyx_t_2 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 59; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+      __Pyx_GOTREF(__pyx_t_2);
+      __pyx_t_6 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_6 == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 59; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+      __pyx_t_2 = PyFloat_FromDouble(solve_quadratic(__pyx_t_8, __pyx_t_5, __pyx_t_6)); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 59; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_GOTREF(__pyx_t_2);
+      __pyx_r = __pyx_t_2;
+      __pyx_t_2 = 0;
+      goto __pyx_L0;
+
+      /* "solve.pyx":58
+ *         if coef[0]:
+ *             return solve_cubic(coef[0], coef[1], coef[2], coef[3])
+ *         elif coef[1]:             # <<<<<<<<<<<<<<
+ *             return solve_quadratic(coef[0], coef[1], coef[2])
+ *         else:
+ */
+    }
+
+    /* "solve.pyx":61
+ *             return solve_quadratic(coef[0], coef[1], coef[2])
+ *         else:
+ *             return -31  # No need to solve, ho-hum             # <<<<<<<<<<<<<<
+ *     elif coef_len == 3:
+ *         if coef[0]:
+ */
+    /*else*/ {
+      __Pyx_XDECREF(__pyx_r);
+      __Pyx_INCREF(__pyx_int_neg_31);
+      __pyx_r = __pyx_int_neg_31;
+      goto __pyx_L0;
+    }
+
+    /* "solve.pyx":55
+ *         else:
+ *             return -31  # No need to solve, ho-hum
+ *     elif coef_len == 4:             # <<<<<<<<<<<<<<
+ *         if coef[0]:
+ *             return solve_cubic(coef[0], coef[1], coef[2], coef[3])
+ */
+    break;
+
+    /* "solve.pyx":62
+ *         else:
+ *             return -31  # No need to solve, ho-hum
+ *     elif coef_len == 3:             # <<<<<<<<<<<<<<
+ *         if coef[0]:
+ *             return solve_quadratic(coef[0], coef[1], coef[2])
+ */
+    case 3:
+
+    /* "solve.pyx":63
+ *             return -31  # No need to solve, ho-hum
+ *     elif coef_len == 3:
+ *         if coef[0]:             # <<<<<<<<<<<<<<
+ *             return solve_quadratic(coef[0], coef[1], coef[2])
+ *         else:
+ */
+    __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_coef, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(__pyx_t_2 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 63; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+    __Pyx_GOTREF(__pyx_t_2);
+    __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_3 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 63; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    if (__pyx_t_3) {
+
+      /* "solve.pyx":64
+ *     elif coef_len == 3:
+ *         if coef[0]:
+ *             return solve_quadratic(coef[0], coef[1], coef[2])             # <<<<<<<<<<<<<<
+ *         else:
+ *             return -31  # No need to solve
+ */
+      __Pyx_XDECREF(__pyx_r);
+      __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_coef, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(__pyx_t_2 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 64; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+      __Pyx_GOTREF(__pyx_t_2);
+      __pyx_t_6 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_6 == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 64; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+      __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_coef, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(__pyx_t_2 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 64; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+      __Pyx_GOTREF(__pyx_t_2);
+      __pyx_t_5 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_5 == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 64; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+      __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_coef, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(__pyx_t_2 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 64; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+      __Pyx_GOTREF(__pyx_t_2);
+      __pyx_t_8 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_8 == (long double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 64; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+      __pyx_t_2 = PyFloat_FromDouble(solve_quadratic(__pyx_t_6, __pyx_t_5, __pyx_t_8)); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 64; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_GOTREF(__pyx_t_2);
+      __pyx_r = __pyx_t_2;
+      __pyx_t_2 = 0;
+      goto __pyx_L0;
+
+      /* "solve.pyx":63
+ *             return -31  # No need to solve, ho-hum
+ *     elif coef_len == 3:
+ *         if coef[0]:             # <<<<<<<<<<<<<<
+ *             return solve_quadratic(coef[0], coef[1], coef[2])
+ *         else:
+ */
+    }
+
+    /* "solve.pyx":66
+ *             return solve_quadratic(coef[0], coef[1], coef[2])
+ *         else:
+ *             return -31  # No need to solve             # <<<<<<<<<<<<<<
+ *     else:
+ *         return -31  # No need to solve, ho-hum
+ */
+    /*else*/ {
+      __Pyx_XDECREF(__pyx_r);
+      __Pyx_INCREF(__pyx_int_neg_31);
+      __pyx_r = __pyx_int_neg_31;
+      goto __pyx_L0;
+    }
+
+    /* "solve.pyx":62
+ *         else:
+ *             return -31  # No need to solve, ho-hum
+ *     elif coef_len == 3:             # <<<<<<<<<<<<<<
+ *         if coef[0]:
+ *             return solve_quadratic(coef[0], coef[1], coef[2])
+ */
+    break;
+    default:
+
+    /* "solve.pyx":68
+ *             return -31  # No need to solve
+ *     else:
+ *         return -31  # No need to solve, ho-hum             # <<<<<<<<<<<<<<
+ */
+    __Pyx_XDECREF(__pyx_r);
+    __Pyx_INCREF(__pyx_int_neg_31);
+    __pyx_r = __pyx_int_neg_31;
+    goto __pyx_L0;
+    break;
+  }
+
+  /* "solve.pyx":41
+ *     return solve_quadratic(coef_a, coef_b, coef_c)
+ * 
+ * def cython_solve_roots(coef):             # <<<<<<<<<<<<<<
+ *     cdef:
+ *         unsigned char coef_len = len(coef);
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_AddTraceback("solve.cython_solve_roots", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
@@ -1007,15 +1524,18 @@ static struct PyModuleDef __pyx_moduledef = {
 #endif
 
 static __Pyx_StringTabEntry __pyx_string_tab[] = {
-  {&__pyx_kp_s_D_Ball_PC_RaspBilliardProject_Bi, __pyx_k_D_Ball_PC_RaspBilliardProject_Bi, sizeof(__pyx_k_D_Ball_PC_RaspBilliardProject_Bi), 0, 0, 1, 0},
+  {&__pyx_kp_s_D_Ball_PC_RaspBilliardProject_Ra, __pyx_k_D_Ball_PC_RaspBilliardProject_Ra, sizeof(__pyx_k_D_Ball_PC_RaspBilliardProject_Ra), 0, 0, 1, 0},
+  {&__pyx_n_s_coef, __pyx_k_coef, sizeof(__pyx_k_coef), 0, 0, 1, 1},
   {&__pyx_n_s_coef_a, __pyx_k_coef_a, sizeof(__pyx_k_coef_a), 0, 0, 1, 1},
   {&__pyx_n_s_coef_b, __pyx_k_coef_b, sizeof(__pyx_k_coef_b), 0, 0, 1, 1},
   {&__pyx_n_s_coef_c, __pyx_k_coef_c, sizeof(__pyx_k_coef_c), 0, 0, 1, 1},
   {&__pyx_n_s_coef_d, __pyx_k_coef_d, sizeof(__pyx_k_coef_d), 0, 0, 1, 1},
   {&__pyx_n_s_coef_e, __pyx_k_coef_e, sizeof(__pyx_k_coef_e), 0, 0, 1, 1},
+  {&__pyx_n_s_coef_len, __pyx_k_coef_len, sizeof(__pyx_k_coef_len), 0, 0, 1, 1},
   {&__pyx_n_s_cython_solve_cubic, __pyx_k_cython_solve_cubic, sizeof(__pyx_k_cython_solve_cubic), 0, 0, 1, 1},
   {&__pyx_n_s_cython_solve_quadratic, __pyx_k_cython_solve_quadratic, sizeof(__pyx_k_cython_solve_quadratic), 0, 0, 1, 1},
   {&__pyx_n_s_cython_solve_quartic, __pyx_k_cython_solve_quartic, sizeof(__pyx_k_cython_solve_quartic), 0, 0, 1, 1},
+  {&__pyx_n_s_cython_solve_roots, __pyx_k_cython_solve_roots, sizeof(__pyx_k_cython_solve_roots), 0, 0, 1, 1},
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
   {&__pyx_n_s_solve, __pyx_k_solve, sizeof(__pyx_k_solve), 0, 0, 1, 1},
   {&__pyx_n_s_test, __pyx_k_test, sizeof(__pyx_k_test), 0, 0, 1, 1},
@@ -1029,40 +1549,53 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
-  /* "solve.pyx":8
+  /* "solve.pyx":30
  *     long double solve_quadratic(const long double coef_a, const long double coef_b, const long double coef_c)
  * 
  * def cython_solve_quartic(long double coef_a, long double coef_b, long double coef_c,             # <<<<<<<<<<<<<<
  *                             long double coef_d, long double coef_e):
  *     return solve_quartic(coef_a, coef_b, coef_c, coef_d, coef_e)
  */
-  __pyx_tuple_ = PyTuple_Pack(5, __pyx_n_s_coef_a, __pyx_n_s_coef_b, __pyx_n_s_coef_c, __pyx_n_s_coef_d, __pyx_n_s_coef_e); if (unlikely(!__pyx_tuple_)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 8; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple_ = PyTuple_Pack(5, __pyx_n_s_coef_a, __pyx_n_s_coef_b, __pyx_n_s_coef_c, __pyx_n_s_coef_d, __pyx_n_s_coef_e); if (unlikely(!__pyx_tuple_)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple_);
   __Pyx_GIVEREF(__pyx_tuple_);
-  __pyx_codeobj__2 = (PyObject*)__Pyx_PyCode_New(5, 0, 5, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple_, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_D_Ball_PC_RaspBilliardProject_Bi, __pyx_n_s_cython_solve_quartic, 8, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 8; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_codeobj__2 = (PyObject*)__Pyx_PyCode_New(5, 0, 5, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple_, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_D_Ball_PC_RaspBilliardProject_Ra, __pyx_n_s_cython_solve_quartic, 30, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "solve.pyx":12
+  /* "solve.pyx":34
  *     return solve_quartic(coef_a, coef_b, coef_c, coef_d, coef_e)
  * 
  * def cython_solve_cubic(long double coef_a, long double coef_b, long double coef_c,             # <<<<<<<<<<<<<<
  *                         long double coef_d):
  *     return solve_cubic(coef_a, coef_b, coef_c, coef_d)
  */
-  __pyx_tuple__3 = PyTuple_Pack(4, __pyx_n_s_coef_a, __pyx_n_s_coef_b, __pyx_n_s_coef_c, __pyx_n_s_coef_d); if (unlikely(!__pyx_tuple__3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 12; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__3 = PyTuple_Pack(4, __pyx_n_s_coef_a, __pyx_n_s_coef_b, __pyx_n_s_coef_c, __pyx_n_s_coef_d); if (unlikely(!__pyx_tuple__3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 34; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__3);
   __Pyx_GIVEREF(__pyx_tuple__3);
-  __pyx_codeobj__4 = (PyObject*)__Pyx_PyCode_New(4, 0, 4, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__3, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_D_Ball_PC_RaspBilliardProject_Bi, __pyx_n_s_cython_solve_cubic, 12, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 12; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_codeobj__4 = (PyObject*)__Pyx_PyCode_New(4, 0, 4, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__3, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_D_Ball_PC_RaspBilliardProject_Ra, __pyx_n_s_cython_solve_cubic, 34, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 34; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "solve.pyx":16
+  /* "solve.pyx":38
  *     return solve_cubic(coef_a, coef_b, coef_c, coef_d)
  * 
  * def cython_solve_quadratic(long double coef_a, long double coef_b, long double coef_c):             # <<<<<<<<<<<<<<
  *     return solve_quadratic(coef_a, coef_b, coef_c)
+ * 
  */
-  __pyx_tuple__5 = PyTuple_Pack(3, __pyx_n_s_coef_a, __pyx_n_s_coef_b, __pyx_n_s_coef_c); if (unlikely(!__pyx_tuple__5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 16; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__5 = PyTuple_Pack(3, __pyx_n_s_coef_a, __pyx_n_s_coef_b, __pyx_n_s_coef_c); if (unlikely(!__pyx_tuple__5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 38; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__5);
   __Pyx_GIVEREF(__pyx_tuple__5);
-  __pyx_codeobj__6 = (PyObject*)__Pyx_PyCode_New(3, 0, 3, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__5, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_D_Ball_PC_RaspBilliardProject_Bi, __pyx_n_s_cython_solve_quadratic, 16, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 16; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_codeobj__6 = (PyObject*)__Pyx_PyCode_New(3, 0, 3, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__5, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_D_Ball_PC_RaspBilliardProject_Ra, __pyx_n_s_cython_solve_quadratic, 38, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 38; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+
+  /* "solve.pyx":41
+ *     return solve_quadratic(coef_a, coef_b, coef_c)
+ * 
+ * def cython_solve_roots(coef):             # <<<<<<<<<<<<<<
+ *     cdef:
+ *         unsigned char coef_len = len(coef);
+ */
+  __pyx_tuple__7 = PyTuple_Pack(2, __pyx_n_s_coef, __pyx_n_s_coef_len); if (unlikely(!__pyx_tuple__7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 41; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_tuple__7);
+  __Pyx_GIVEREF(__pyx_tuple__7);
+  __pyx_codeobj__8 = (PyObject*)__Pyx_PyCode_New(1, 0, 2, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__7, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_D_Ball_PC_RaspBilliardProject_Ra, __pyx_n_s_cython_solve_roots, 41, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 41; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -1072,6 +1605,7 @@ static int __Pyx_InitCachedConstants(void) {
 
 static int __Pyx_InitGlobals(void) {
   if (__Pyx_InitStrings(__pyx_string_tab) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+  __pyx_int_neg_31 = PyInt_FromLong(-31); if (unlikely(!__pyx_int_neg_31)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   return 0;
   __pyx_L1_error:;
   return -1;
@@ -1171,45 +1705,58 @@ PyMODINIT_FUNC PyInit_solve(void)
   if (__Pyx_patch_abc() < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   #endif
 
-  /* "solve.pyx":8
+  /* "solve.pyx":30
  *     long double solve_quadratic(const long double coef_a, const long double coef_b, const long double coef_c)
  * 
  * def cython_solve_quartic(long double coef_a, long double coef_b, long double coef_c,             # <<<<<<<<<<<<<<
  *                             long double coef_d, long double coef_e):
  *     return solve_quartic(coef_a, coef_b, coef_c, coef_d, coef_e)
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5solve_1cython_solve_quartic, NULL, __pyx_n_s_solve); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 8; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5solve_1cython_solve_quartic, NULL, __pyx_n_s_solve); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cython_solve_quartic, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 8; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cython_solve_quartic, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "solve.pyx":12
+  /* "solve.pyx":34
  *     return solve_quartic(coef_a, coef_b, coef_c, coef_d, coef_e)
  * 
  * def cython_solve_cubic(long double coef_a, long double coef_b, long double coef_c,             # <<<<<<<<<<<<<<
  *                         long double coef_d):
  *     return solve_cubic(coef_a, coef_b, coef_c, coef_d)
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5solve_3cython_solve_cubic, NULL, __pyx_n_s_solve); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 12; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5solve_3cython_solve_cubic, NULL, __pyx_n_s_solve); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 34; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cython_solve_cubic, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 12; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cython_solve_cubic, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 34; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "solve.pyx":16
+  /* "solve.pyx":38
  *     return solve_cubic(coef_a, coef_b, coef_c, coef_d)
  * 
  * def cython_solve_quadratic(long double coef_a, long double coef_b, long double coef_c):             # <<<<<<<<<<<<<<
  *     return solve_quadratic(coef_a, coef_b, coef_c)
+ * 
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5solve_5cython_solve_quadratic, NULL, __pyx_n_s_solve); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 16; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5solve_5cython_solve_quadratic, NULL, __pyx_n_s_solve); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 38; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cython_solve_quadratic, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 16; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cython_solve_quadratic, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 38; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+
+  /* "solve.pyx":41
+ *     return solve_quadratic(coef_a, coef_b, coef_c)
+ * 
+ * def cython_solve_roots(coef):             # <<<<<<<<<<<<<<
+ *     cdef:
+ *         unsigned char coef_len = len(coef);
+ */
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5solve_7cython_solve_roots, NULL, __pyx_n_s_solve); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 41; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cython_solve_roots, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 41; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "solve.pyx":1
- * cdef extern from "QuadRootsRevG.h":             # <<<<<<<<<<<<<<
- *     long double solve_quartic(const long double coef_a, const long double coef_b, const long double coef_c,
- *                                 const long double coef_d, const long double coef_e)
+ * # The MIT License (MIT)             # <<<<<<<<<<<<<<
+ * #
+ * # Copyright (c) 2016 Utthawut Bootdee
  */
   __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
@@ -1392,6 +1939,87 @@ invalid_keyword:
     #endif
 bad:
     return -1;
+}
+
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Generic(PyObject *o, PyObject* j) {
+    PyObject *r;
+    if (!j) return NULL;
+    r = PyObject_GetItem(o, j);
+    Py_DECREF(j);
+    return r;
+}
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_List_Fast(PyObject *o, Py_ssize_t i,
+                                                              CYTHON_NCP_UNUSED int wraparound,
+                                                              CYTHON_NCP_UNUSED int boundscheck) {
+#if CYTHON_COMPILING_IN_CPYTHON
+    if (wraparound & unlikely(i < 0)) i += PyList_GET_SIZE(o);
+    if ((!boundscheck) || likely((0 <= i) & (i < PyList_GET_SIZE(o)))) {
+        PyObject *r = PyList_GET_ITEM(o, i);
+        Py_INCREF(r);
+        return r;
+    }
+    return __Pyx_GetItemInt_Generic(o, PyInt_FromSsize_t(i));
+#else
+    return PySequence_GetItem(o, i);
+#endif
+}
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Tuple_Fast(PyObject *o, Py_ssize_t i,
+                                                              CYTHON_NCP_UNUSED int wraparound,
+                                                              CYTHON_NCP_UNUSED int boundscheck) {
+#if CYTHON_COMPILING_IN_CPYTHON
+    if (wraparound & unlikely(i < 0)) i += PyTuple_GET_SIZE(o);
+    if ((!boundscheck) || likely((0 <= i) & (i < PyTuple_GET_SIZE(o)))) {
+        PyObject *r = PyTuple_GET_ITEM(o, i);
+        Py_INCREF(r);
+        return r;
+    }
+    return __Pyx_GetItemInt_Generic(o, PyInt_FromSsize_t(i));
+#else
+    return PySequence_GetItem(o, i);
+#endif
+}
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Fast(PyObject *o, Py_ssize_t i, int is_list,
+                                                     CYTHON_NCP_UNUSED int wraparound,
+                                                     CYTHON_NCP_UNUSED int boundscheck) {
+#if CYTHON_COMPILING_IN_CPYTHON
+    if (is_list || PyList_CheckExact(o)) {
+        Py_ssize_t n = ((!wraparound) | likely(i >= 0)) ? i : i + PyList_GET_SIZE(o);
+        if ((!boundscheck) || (likely((n >= 0) & (n < PyList_GET_SIZE(o))))) {
+            PyObject *r = PyList_GET_ITEM(o, n);
+            Py_INCREF(r);
+            return r;
+        }
+    }
+    else if (PyTuple_CheckExact(o)) {
+        Py_ssize_t n = ((!wraparound) | likely(i >= 0)) ? i : i + PyTuple_GET_SIZE(o);
+        if ((!boundscheck) || likely((n >= 0) & (n < PyTuple_GET_SIZE(o)))) {
+            PyObject *r = PyTuple_GET_ITEM(o, n);
+            Py_INCREF(r);
+            return r;
+        }
+    } else {
+        PySequenceMethods *m = Py_TYPE(o)->tp_as_sequence;
+        if (likely(m && m->sq_item)) {
+            if (wraparound && unlikely(i < 0) && likely(m->sq_length)) {
+                Py_ssize_t l = m->sq_length(o);
+                if (likely(l >= 0)) {
+                    i += l;
+                } else {
+                    if (PyErr_ExceptionMatches(PyExc_OverflowError))
+                        PyErr_Clear();
+                    else
+                        return NULL;
+                }
+            }
+            return m->sq_item(o, i);
+        }
+    }
+#else
+    if (is_list || PySequence_Check(o)) {
+        return PySequence_GetItem(o, i);
+    }
+#endif
+    return __Pyx_GetItemInt_Generic(o, PyInt_FromSsize_t(i));
 }
 
 static int __pyx_bisect_code_objects(__Pyx_CodeObjectCacheEntry* entries, int count, int code_line) {

@@ -29,16 +29,17 @@ import cmath
 import common
 import table
 try:
-  import speedup.solve as solve
-  USE_CYTHON = True
+    import speedup.solve as solve
+    solve_roots = solve.cython_solve_roots
 except:
-  def solve_polynomial(p):
-    ''' p is array of polynomial coefficients
-    '''
-    r = np.roots(p)
-    real_pos = r[(r.imag == 0.0j) & (r.real >= 0.0)]
-    return real_pos.real.min() if len(real_pos) > 0 else -31.0 # no real positive roots, ho-hum
-  USE_CYTHON = False
+    def python_solve_roots(p):
+        ''' p is array of polynomial coefficients
+        '''
+        r = np.roots(p)
+        real_pos = r[(r.imag == 0.0j) & (r.real >= 0.0)]
+        return real_pos.real.min() if len(real_pos) > 0 else -31.0  # no real positive roots, ho-hum
+
+    solve_roots = python_solve_roots
 
 
 TimeSpeedUp = 0.0
@@ -362,7 +363,7 @@ def is_circle_line_segment_intersect2(circle_center, start_line, end_line, epsil
     b = 2*np.dot(d, f)
     c = np.dot(f, f) - r_square_tmp
 
-    root = solve.cython_solve_quadratic(a, b, c) if USE_CYTHON else solve_polynomial([a, b, c])
+    root = solve_roots([a, b, c])
     if 0 >= root <= 1:
         # intersect_point = start_line + roots[i]*d
         intersect_point = start_line + (root*d_abs)*d_unit
@@ -741,14 +742,7 @@ class PoolBall(object):
         x1 = 2*bx*cx + 2*by*cy
         x0 = (cx*cx + cy*cy) - (4*BilliardBall.r_square)
 
-        if x4:
-            root = solve.cython_solve_quartic(x4, x3, x2, x1, x0) if USE_CYTHON else solve_polynomial([x4, x3, x2, x1, x0])
-        elif x3:
-            root = solve.cython_solve_cubic(x3, x2, x1, x0) if USE_CYTHON else solve_polynomial([x3, x2, x1, x0])
-        elif x2:
-            root = solve.cython_solve_quadratic(x2, x1, x0) if USE_CYTHON else solve_polynomial([x2, x1, x0])
-        else:
-            return common.MAX_TIME
+        root = solve_roots([x4, x3, x2, x1, x0])
 
         t_target = root - ball_t_min
         if t_target > 0:
@@ -787,7 +781,7 @@ class PoolBall(object):
 
         # Left Rail
         x0 = rx - table.BilliardTable.left_rail_r
-        root = solve.cython_solve_quadratic(x2, x1, x0) if USE_CYTHON else solve_polynomial([x2, x1, x0])
+        root = solve_roots([x2, x1, x0])
         t_target = root - self.t
         if t_target > 0:
             if t_target <= t:
@@ -797,7 +791,7 @@ class PoolBall(object):
 
         # Right Rail
         x0 = rx - table.BilliardTable.right_rail_r
-        root = solve.cython_solve_quadratic(x2, x1, x0) if USE_CYTHON else solve_polynomial([x2, x1, x0])
+        root = solve_roots([x2, x1, x0])
         t_target = root - self.t
         if t_target > 0:
             if t_target <= t:
@@ -811,7 +805,7 @@ class PoolBall(object):
 
         # Top Rail
         x0 = ry - table.BilliardTable.top_rail_r
-        root = solve.cython_solve_quadratic(x2, x1, x0) if USE_CYTHON else solve_polynomial([x2, x1, x0])
+        root = solve_roots([x2, x1, x0])
         t_target = root - self.t
         if t_target > 0:
             if t_target <= t:
@@ -821,7 +815,7 @@ class PoolBall(object):
 
         # Bottom Rail
         x0 = ry - table.BilliardTable.bot_rail_r
-        root = solve.cython_solve_quadratic(x2, x1, x0) if USE_CYTHON else solve_polynomial([x2, x1, x0])
+        root = solve_roots([x2, x1, x0])
         t_target = root - self.t
         if t_target > 0:
             if t_target <= t:
@@ -854,7 +848,7 @@ class PoolBall(object):
             x1 = v*(eq[table.LineEq.A_COEF]*sin_theta - eq[table.LineEq.B_COEF]*cos_theta)
             x0 = -(eq[table.LineEq.A_COEF]*rx + eq[table.LineEq.B_COEF]*ry + eq[table.LineEq.C_COEF])
 
-            root = solve.cython_solve_quadratic(x2, x1, x0) if USE_CYTHON else solve_polynomial([x2, x1, x0])
+            root = solve_roots([x2, x1, x0])
             t_target = root - self.t
             if t_target > 0:
                 if t_target <= t:
@@ -876,12 +870,7 @@ class PoolBall(object):
             x1 = 2*bx*cx + 2*by*cy
             x0 = (cx*cx + cy*cy) - BilliardBall.r_square
 
-            if x4:
-                root = solve.cython_solve_quartic(x4, x3, x2, x1, x0) if USE_CYTHON else solve_polynomial([x4, x3, x2, x1, x0])
-            elif x3:
-                root = solve.cython_solve_cubic(x3, x2, x1, x0) if USE_CYTHON else solve_polynomial([x3, x2, x1, x0])
-            elif x2:
-                root = solve.cython_solve_quadratic(x2, x1, x0) if USE_CYTHON else solve_polynomial([x2, x1, x0])
+            root = solve_roots([x4, x3, x2, x1, x0])
 
             t_target = root - self.t
             if t_target > 0:
@@ -923,12 +912,7 @@ class PoolBall(object):
             x1 = 2*bx*cx + 2*by*cy
             x0 = (cx*cx + cy*cy) - table.BilliardTable.r_of_pocket_width_square
 
-            if x4:
-                root = solve.cython_solve_quartic(x4, x3, x2, x1, x0) if USE_CYTHON else solve_polynomial([x4, x3, x2, x1, x0])
-            elif x3:
-                root = solve.cython_solve_cubic(x3, x2, x1, x0) if USE_CYTHON else solve_polynomial([x3, x2, x1, x0])
-            elif x2:
-                root = solve.cython_solve_quadratic(x2, x1, x0) if USE_CYTHON else solve_polynomial([x2, x1, x0])
+            root = solve_roots([x4, x3, x2, x1, x0])
 
             t_target = root - self.t
             if t_target > 0:

@@ -3,5 +3,5 @@
 # $ cd ~/pi3d
 # $ git checkout develop
 import sys
-sys.path.insert(1, '/home/patrick/pi3d')
-# sys.path.insert(1, 'C:\Users\Patrick\pi3d') # on windows
+# sys.path.insert(1, '/home/patrick/pi3d')  # on Linux
+sys.path.insert(1, 'D:\Ball(PC)\RaspBilliardProject\pi3d_git\pi3d')  # on windows

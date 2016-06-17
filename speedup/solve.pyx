@@ -37,3 +37,33 @@ def cython_solve_cubic(long double coef_a, long double coef_b, long double coef_
     
 def cython_solve_quadratic(long double coef_a, long double coef_b, long double coef_c):
     return solve_quadratic(coef_a, coef_b, coef_c)
+
+def cython_solve_roots(coef):
+    cdef:
+        unsigned char coef_len = len(coef);
+
+    if coef_len == 5:
+        # This below mess checking will solve faster and compatible with numpy.roots
+        if coef[0]:
+            return solve_quartic(coef[0], coef[1], coef[2], coef[3], coef[4])
+        elif coef[1]:
+            return solve_cubic(coef[0], coef[1], coef[2], coef[3])
+        elif coef[2]:
+            return solve_quadratic(coef[0], coef[1], coef[2])
+        else:
+            return -31  # No need to solve, ho-hum
+    elif coef_len == 4:
+        if coef[0]:
+            return solve_cubic(coef[0], coef[1], coef[2], coef[3])
+        elif coef[1]:
+            return solve_quadratic(coef[0], coef[1], coef[2])
+        else:
+            return -31  # No need to solve, ho-hum
+    elif coef_len == 3:
+        if coef[0]:
+            return solve_quadratic(coef[0], coef[1], coef[2])
+        else:
+            return -31  # No need to solve, ho-hum
+    else:
+        return -31  # No need to solve, ho-hum
+    
