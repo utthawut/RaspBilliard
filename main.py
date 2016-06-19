@@ -23,14 +23,20 @@
 #!/usr/bin/python
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from math import sin, cos, radians
-import demo # for development allows loading of pi3d version loaded in user space (see demo.py)
+import demo  # for development allows loading of pi3d version loaded in user space (see demo.py)
 import pi3d
 import common
 import table
 import calculate
 import time
 import numpy as np
+from input.base import InputMode, InputMax, InputMin, InputRes
+import input.normal
+import input.sensor
+import input.android
+
+# Select input mode here
+input_mode = InputMode.NORMAL
 
 
 class StartShot(object):
@@ -40,15 +46,11 @@ class StartShot(object):
     SHOT_INITIATED = 3
     SHOT_READY = 4
 
-# Constant/Maximum value
-V_CUE_DECIMAL_PLACE = 10
-MAX_CAM_ROTATION_R = 360
-MAX_CAM_ROTATION_L = -360
-MAX_CAM_TILT = 90
-MAX_V_CUE = 40
+# Initial state
+start_shot = StartShot.WAITING
 
-# Load display screen
-DISPLAY = pi3d.Display.create(x=50, y=50, samples=2)
+# Load Display screen
+display = pi3d.Display.create(x=50, y=50, samples=2)
 
 # Initial Game Type
 table.BilliardTable.set_detail_auto(table_type=table.TableType.POOL, table_size=table.TableSize.EIGHT_FT,
@@ -58,14 +60,14 @@ calculate.BilliardBall.set_mass(common.DEF_BALL_MASS, common.DEF_CUE_MASS)
 calculate.CalConst.initial_constant()
 
 # Create Shader
-BallShader = pi3d.Shader("uv_reflect")
-TableShader = BallShader
-ShadowShader = pi3d.Shader("uv_flat")
-Tabletex = pi3d.Texture("media/textures/felt.jpg")
-Cuetex = pi3d.Texture("media/textures/cue_tex.png")
-Normtex = pi3d.Texture("media/textures/grasstile_n.jpg")
-Shinetex = pi3d.Texture("media/textures/photosphere_small.jpg")
-Shadowtex = pi3d.Texture("media/textures/shadow.png")
+ball_shader = pi3d.Shader("uv_reflect")
+table_shader = ball_shader
+shadow_shader = pi3d.Shader("uv_flat")
+table_tex = pi3d.Texture("media/textures/felt.jpg")
+cue_tex = pi3d.Texture("media/textures/cue_tex.png")
+norm_tex = pi3d.Texture("media/textures/grasstile_n.jpg")
+shine_tex = pi3d.Texture("media/textures/photosphere_small.jpg")
+shadow_tex = pi3d.Texture("media/textures/shadow.png")
 
 # Create Light
 light_source = pi3d.Light(
@@ -73,11 +75,11 @@ light_source = pi3d.Light(
     lightcol=(0.9, 0.9, 0.9), lightamb=(0.3, 0.3, 0.3), is_point=False)
 
 # Create Table
-TableModel = pi3d.Model(file_string='media/models/Pool_Table_8ft.obj', name='Table',
-                        sx = common.DIM_RATIO, sy=common.DIM_RATIO, sz=common.DIM_RATIO, light=light_source)
-#TableModel.set_shader(TableShader)
-#TableModel.set_normal_shine(Normtex, 500.0, Shinetex, 0.05, bump_factor=0.1)
-TableModel.set_draw_details(TableShader, [Tabletex, Normtex, Shinetex], 500.0, 0.01, 0.1)
+table_model = pi3d.Model(file_string='media/models/Pool_Table_8ft.obj', name='Table',
+                        sx=common.DIM_RATIO, sy=common.DIM_RATIO, sz=common.DIM_RATIO, light=light_source)
+# table_model.set_shader(table_shader)
+# table_model.set_normal_shine(norm_tex, 500.0, shine_tex, 0.05, bump_factor=0.1)
+table_model.set_draw_details(table_shader, [table_tex, norm_tex, shine_tex], 500.0, 0.01, 0.1)
 
 # Create Trajectories
 traject_list = [(i*0.1, i*0.1, i*0.1) for i in range(500)]
@@ -102,80 +104,79 @@ for b in (("Cue_Ball", 0, 0, 10),
           ("Pool_Ball_7", 7, -r_epsil_breaking, 30 + common.COS_30),
           ("Pool_Ball_9", 9, 0, 30 + 2 * common.COS_30)):
     ball_obj = calculate.PoolBall(name=b[0], ball_index=b[1], state=calculate.STATIONARY_STATE,
-                       r=np.array([b[2], table.BilliardTable.bot_rail_r + b[3] * DIAMETER, 
-                                  table.BilliardTable.table_height + r_breaking]),
-                       v=common.ZERO_VECTOR, w=common.ZERO_VECTOR, u=common.ZERO_VECTOR, 
-                       heading_angle=0, traject_instance=False, light=light_source)
-    ball_obj.ball_model.set_draw_details(BallShader, [ball_obj.tex, Normtex, Shinetex], 0.0, 0.1, bump_factor=0.0)
-    ball_obj.shadow.set_draw_details(ShadowShader, [Shadowtex])
+                                  r=np.array([b[2], table.BilliardTable.bot_rail_r + b[3] * DIAMETER,
+                                              table.BilliardTable.table_height + r_breaking]),
+                                  v=common.ZERO_VECTOR, w=common.ZERO_VECTOR, u=common.ZERO_VECTOR,
+                                  heading_angle=0, traject_instance=False, light=light_source)
+    ball_obj.ball_model.set_draw_details(ball_shader, [ball_obj.tex, norm_tex, shine_tex], 0.0, 0.1, bump_factor=0.0)
+    ball_obj.shadow.set_draw_details(shadow_shader, [shadow_tex])
 
 cue_ball = calculate.PoolBall.instances[0] # this is the only ball we ref by name later
-
-# Initial Input of Cue Stick parameters
-start_shot = StartShot.WAITING
-v_cue = top_back_spin = left_right_spin = 0
-cue_angle = 5
-cue_stick_changed = True
 
 # Create Cue Stick
 cue_stick = pi3d.Triangle(corners=((-0.01, 0.0), (0.0, 0.01), (0.01, 0.0)))
 cue_obj = pi3d.TCone(radiusBot=0.1, radiusTop=0.03, height=4.0, sides=24, cy=-2.0)
 cue_stick.add_child(cue_obj)
 cue_obj.set_material((1.0, 0.5, 0.1))
-cue_obj.set_draw_details(BallShader, [Cuetex, Normtex, Shinetex], 50.0, 0.1, bump_factor=0.3)
+cue_obj.set_draw_details(ball_shader, [cue_tex, norm_tex, shine_tex], 50.0, 0.1, bump_factor=0.3)
 cue_obj.set_alpha(0.75)
 
 # Create background
-Cube = pi3d.EnvironmentCube(size=500.0, maptype='FACES')
-Cube.set_draw_details(ShadowShader, pi3d.loadECfiles('media/textures','skybox_hall'))
+cube = pi3d.EnvironmentCube(size=500.0, maptype='FACES')
+cube.set_draw_details(shadow_shader, pi3d.loadECfiles('media/textures','skybox_hall'))
 
 # Initial Frame Render
 frame_to_render = []
 render_index = 0
-#DrawBallFirstTime = True  # Need to fix this
-DISPLAY.frames_per_second = common.NOR_FRAME_PER_SEC
+display.frames_per_second = common.NOR_FRAME_PER_SEC
 
 # Create Camera
-CAMERA = pi3d.Camera.instance()
-CamRadius = 15.0 # radius of camera position
-CamRotation = 0.0  # rotation of camera
-CamTilt = 25.0  # CamTilt of camera
-CamEnable = True
+camera = pi3d.Camera.instance()
+cam_enable = True
 
-# Create key presses (keyboard)
-MyKeys = pi3d.Keyboard()
-MyMouse = pi3d.Mouse(restrict=False)
-MyMouse.start()
-mx, my = MyMouse.position()
-omx, omy = mx, my
-cam_dist = None
-while DISPLAY.loop_running():
+# Create input of game
+my_keys = pi3d.Keyboard()
+my_mouse = pi3d.Mouse(restrict=False)
+my_mouse.start()
+if input_mode == InputMode.NORMAL:
+    my_input = input.normal.GameInput(keyboard_obj=my_keys, mouse_obj=my_mouse)
+elif input_mode == InputMode.SENSOR:
+    my_input = input.sensor.GameInput()     # future
+elif input_mode == InputMode.ANDROID:
+    my_input = input.android.GameInput()    # future
+else:
+    raise ValueError("Input Mode is invalid")
+
+while display.loop_running():
 
     cue_ball_location = np.array(cue_ball.empty1.unif[0:3])
-    # move camera circularly around cue ball
-    if CamEnable:
-        if cam_dist is None:
-            cam_dist = CamRadius
+    # move Camera circularly around cue ball
+    if cam_enable:
+        if my_input.cam_dist is None:
+            my_input.cam_dist = my_input.cam_radius
         else:
-            tmp_dist = ((CAMERA.eye - cue_ball_location) ** 2).sum() ** 0.5 # euclidean distance
-            cam_dist = tmp_dist * 0.98 + CamRadius * 0.02 # tweening
-        CAMERA.relocate(CamRotation, -CamTilt, cue_ball_location, [-cam_dist, -cam_dist, -cam_dist])
+            tmp_dist = ((camera.eye - cue_ball_location) ** 2).sum() ** 0.5  # euclidean distance
+            my_input.cam_dist = tmp_dist * 0.98 + my_input.cam_radius * 0.02  # tweening
+        camera.relocate(my_input.cam_rotate,
+                        -my_input.cam_tilt,
+                        cue_ball_location,
+                        [-my_input.cam_dist, -my_input.cam_dist, -my_input.cam_dist])
 
     # move cue stick around cue ball
     if start_shot == StartShot.WAITING:
         cue_stick.position(cue_ball_location[0], cue_ball_location[1] - 2.0, cue_ball_location[2])
-        cue_stick.rotateToY(-CamRotation)
-        v_factor = 0.25 + 0.75 * v_cue / MAX_V_CUE
+        cue_stick.rotateToY(-my_input.cam_rotate)
+        v_factor = 0.25 + 0.75 * my_input.v_cue / InputMax.V_CUE
         table_factor = table.BilliardTable.r / 10.0
-        cue_obj.position(table_factor * -left_right_spin, table_factor * top_back_spin, -0.25 * v_factor)
-        cue_obj.rotateToX(cue_angle * 0.4 + 105.0)
+        cue_obj.position(table_factor * -my_input.lr_spin, table_factor * my_input.tb_spin, -0.25 * v_factor)
+        cue_obj.rotateToX(my_input.cue_angle * 0.4 + 105.0)
         cue_obj.rotateToY(360.0 * v_factor)
         cue_obj.set_material((0.6 - v_factor * 0.2,
                               0.4 + v_factor * 0.3,
                               0.6 - v_factor * 0.1))
         cue_stick.draw()
 
-    TableModel.draw()
+    table_model.draw()
 
     # Draw Trajectories
     if start_shot == StartShot.AIMING_READY and len(traject_list) > 0:
@@ -183,7 +184,7 @@ while DISPLAY.loop_running():
 
     if start_shot == StartShot.SHOT_READY:
         sum_del_t = 0.0
-        while sum_del_t < common.NOR_SAMP_PERIOD:# and render_index < (len(frame_to_render) - 1):
+        while sum_del_t < common.NOR_SAMP_PERIOD:   # and render_index < (len(frame_to_render) - 1):
             sum_del_t += 1.0 / frame_to_render[render_index]
             for i, ball_obj_traject in enumerate(calculate.PoolBall.instances_traject):
                 ball_obj = calculate.PoolBall.instances[i]
@@ -203,129 +204,36 @@ while DISPLAY.loop_running():
         ball_obj.empty1.draw()
         ball_obj.shadow.draw()
 
-    Cube.draw()
-    
-    mx, my = MyMouse.position()
-    CamRotation += (omx - mx) * 0.05
-    CamTilt += (omy - my) * 0.05
-    omx, omy = mx, my
+    cube.draw()
 
-    # Check Keyboard
-    k = MyKeys.read()
-    if k > -1:
-        if k == 111:          # key 'O' to zoom out
-            if CamRadius < 120:
-                CamRadius += 5
-        elif k == 105:        # key 'I' to zoom in
-            if CamRadius >= 10:
-                CamRadius -= 5
-        elif k == 119:        # key 'W' to move camera up
-            if CamTilt < MAX_CAM_TILT:
-                CamTilt += 1
-                cam_dist = None
-        elif k == 115:        # key 'S' to move camera down
-            if CamTilt > -90:
-                CamTilt -= 1
-                cam_dist = None
-        elif k == 97:        # key 'A' to move camera rotate left
-            if CamRotation == MAX_CAM_ROTATION_L:
-                CamRotation = 1
-            else:
-                CamRotation -= .5
-            cam_dist = None
-            cue_stick_changed = True
-        elif k == 100:        # key 'd' to move rotate right
-            if CamRotation == MAX_CAM_ROTATION_R:
-                CamRotation = -1
-            else:
-                CamRotation += .5
-            cam_dist = None
-            cue_stick_changed = True
-        elif k == 27:        # key ESC to terminate
-            MyKeys.close()
-            DISPLAY.destroy()
-            break
-        elif k == 107:      # key 'K'
-            tmp_v_cue = v_cue + 1
-            if tmp_v_cue <= MAX_V_CUE:
-                v_cue = tmp_v_cue
-                cue_stick_changed = True
-                if start_shot != StartShot.SHOT_READY:
-                    start_shot = StartShot.WAITING
-        elif k == 108:      # key 'L'
-            tmp_v_cue = v_cue - 1
-            if tmp_v_cue >= 0:
-                v_cue = tmp_v_cue
-                cue_stick_changed = True
-                if start_shot != StartShot.SHOT_READY:
-                    start_shot = StartShot.WAITING
-        elif k == 117:      # key 'U'
-            tmp_cue_angle = cue_angle + 1
-            if tmp_cue_angle <= 90:
-                cue_angle = tmp_cue_angle
-                cue_stick_changed = True
-            if start_shot != StartShot.SHOT_READY:
-                start_shot = StartShot.WAITING
-        elif k == 106:      # key 'J'
-            tmp_cue_angle = cue_angle - 1
-            if tmp_cue_angle >= 0:
-                cue_angle = tmp_cue_angle
-                cue_stick_changed = True
-            if start_shot != StartShot.SHOT_READY:
-                start_shot = StartShot.WAITING
-        # Ball-Centric
-        elif k == 259 or k == 134:      # key up
-            tmp_top_back_spin = top_back_spin + 2
-            if tmp_top_back_spin <= 60:
-                if (((table.BilliardTable.r*tmp_top_back_spin/100)**2 +
-                        (table.BilliardTable.r*left_right_spin/100)**2) < calculate.BilliardBall.r_square):
-                    top_back_spin = tmp_top_back_spin
-                    cue_stick_changed = True
-                    if start_shot != StartShot.SHOT_READY:
-                        start_shot = StartShot.WAITING
-        elif k == 258 or k == 135:      # key down
-            tmp_top_back_spin = top_back_spin - 2
-            if tmp_top_back_spin >= -60:
-                if (((table.BilliardTable.r*tmp_top_back_spin/100)**2 +
-                        (table.BilliardTable.r*left_right_spin/100)**2) < calculate.BilliardBall.r_square):
-                    top_back_spin = tmp_top_back_spin
-                    cue_stick_changed = True
-                    if start_shot != StartShot.SHOT_READY:
-                        start_shot = StartShot.WAITING
-        elif k == 260 or k == 136:      # key left
-            tmp_left_right_spin = left_right_spin + 2
-            if tmp_left_right_spin <= 60:
-                if (((table.BilliardTable.r*top_back_spin/100)**2 +
-                        (table.BilliardTable.r*tmp_left_right_spin/100)**2) < calculate.BilliardBall.r_square):
-                    left_right_spin = tmp_left_right_spin
-                    cue_stick_changed = True
-                    if start_shot != StartShot.SHOT_READY:
-                        start_shot = StartShot.WAITING
-        elif k == 261 or k == 137:      # key right
-            tmp_left_right_spin = left_right_spin - 2
-            if tmp_left_right_spin >= -60:
-                if (((table.BilliardTable.r*top_back_spin/100)**2 +
-                        (table.BilliardTable.r*tmp_left_right_spin/100)**2) < calculate.BilliardBall.r_square):
-                    left_right_spin = tmp_left_right_spin
-                    cue_stick_changed = True
-                    if start_shot != StartShot.SHOT_READY:
-                        start_shot = StartShot.WAITING
-        elif k == 102:       # key 'F' for aiming
-            start_shot = StartShot.AIMING_INITIATED
-        elif k == 103:       # key 'G' for shooting
+    if start_shot != StartShot.SHOT_READY:
+        # Update input if Game is not rendering (ball is not moving)
+        my_input.update_all_input()
+        if my_input.cue_stick_changed:
+            my_input.cue_stick_changed = False
+            start_shot = StartShot.WAITING
+            '''
+            print("English", table.BilliardTable.r * (my_input.lr_spin/InputRes.SPIN_DP),
+                  "Draw/Follow", table.BilliardTable.r * (my_input.tb_spin/InputRes.SPIN_DP),
+                  "Cue_Velo", my_input.v_cue,
+                  "Cue_Angle", my_input.cue_angle,
+                  "Heading", my_input.cam_rotate)
+            '''
+        if my_input.is_start_shot():
             if start_shot == StartShot.AIMING_READY:
                 start_shot = StartShot.SHOT_READY
                 render_index = 0
             else:
                 start_shot = StartShot.SHOT_INITIATED
-    '''
-    if cue_stick_changed:
-        print("English", table.BilliardTable.r*left_right_spin/100,
-              "Draw/Follow", table.BilliardTable.r*top_back_spin/100,
-              "Cue_Velo", v_cue,
-              "Cue_Angle", cue_angle,
-              "Heading", CamRotation)
-        cue_stick_changed = False'''
+        elif my_input.is_start_aim():
+            start_shot = StartShot.AIMING_INITIATED
+        elif my_input.is_exit():
+            my_keys.close()
+            display.destroy()
+            break
+    else:
+        # Update camera input during ball rendering
+        my_input.update_camera_move()
 
     if start_shot == StartShot.SHOT_INITIATED or start_shot == StartShot.AIMING_INITIATED:
         start_time_predict = 0
@@ -339,12 +247,12 @@ while DISPLAY.loop_running():
             if ball_obj.ball_index == 0:  # cue_ball's index = 0
                 cue_ball_traject = ball_obj
 
-        v, w = calculate.cal_cue_impact(a=table.BilliardTable.r*left_right_spin/100,
-                                            b=table.BilliardTable.r*top_back_spin/100,
-                                            theta=cue_angle,
-                                            v_cue=v_cue/V_CUE_DECIMAL_PLACE)
+        v, w = calculate.cal_cue_impact(a=table.BilliardTable.r * (my_input.lr_spin / InputRes.SPIN_DP),
+                                        b=table.BilliardTable.r * (my_input.tb_spin / InputRes.SPIN_DP),
+                                        theta=my_input.cue_angle,
+                                        v_cue=my_input.v_cue / InputRes.V_CUE_DP)
         cue_ball_traject.init_collide_outcome(state=calculate.STATIONARY_STATE,
-                                              heading_angle=(CamRotation+360) % 360,
+                                              heading_angle=(my_input.cam_rotate + 360) % 360,
                                               v=v, w=w, u=calculate.cal_relative_velo_impact(v, w),
                                               cue_stick_collide=True)
         cue_ball_traject.update_state_collide()
@@ -352,15 +260,15 @@ while DISPLAY.loop_running():
         traject_list.append((cue_ball_traject.r.real[common.X_AXIS]*common.DIM_RATIO,
                              cue_ball_traject.r.real[common.Z_AXIS]*common.DIM_RATIO,
                              cue_ball_traject.r.real[common.Y_AXIS]*common.DIM_RATIO))
-        print ("Start v impact***", v)
-        print ("Start w impact***", w)
-        print ("Start r***", cue_ball_traject.r)
-        print ("Start v***", cue_ball_traject.v)
-        print ("Start v0***", cue_ball_traject.v0)
-        print ("Start u***", cue_ball_traject.u)
-        print ("Start u0***", cue_ball_traject.u0)
-        print ("Start u0_unit***", cue_ball_traject.u0_unit)
-        print ("Heading Angle", cue_ball_traject.heading_angle)
+        print("Start v impact***", v)
+        print("Start w impact***", w)
+        print("Start r***", cue_ball_traject.r)
+        print("Start v***", cue_ball_traject.v)
+        print("Start v0***", cue_ball_traject.v0)
+        print("Start u***", cue_ball_traject.u)
+        print("Start u0***", cue_ball_traject.u0)
+        print("Start u0_unit***", cue_ball_traject.u0_unit)
+        print("Heading Angle", cue_ball_traject.heading_angle)
         calculate.PoolBall.t_table = 0
         time_to_event = cue_ball_traject.find_time_to_collision(find_traject=True)
         normal_loop = int(time_to_event/common.NOR_SAMP_PERIOD)
@@ -420,7 +328,7 @@ while DISPLAY.loop_running():
             start_shot = StartShot.SHOT_READY
         elif start_shot == StartShot.AIMING_INITIATED:
             start_shot = StartShot.AIMING_READY
-            if len(traject_list) < 500: # only need to do this once per f press
+            if len(traject_list) < 500:  # only need to do this once per f press
                 for i in range(500 - len(traject_list)):
                     traject_list.append(traject_list[-1])
             elif len(traject_list) >= 500:
@@ -434,5 +342,5 @@ while DISPLAY.loop_running():
         print("*****Time for response:******************", start_time_respond)
         print("*****Time for prediction:******************", start_time_predict)
         print("*****Time for calculation:******************", time.time() - start_time_over)
-        #with open('temp.txt', 'w') as f:
-        #  f.write('number={} list={}'.format(len(frame_to_render), frame_to_render))
+        # with open('temp.txt', 'w') as f:
+        #     f.write('number={} list={}'.format(len(frame_to_render), frame_to_render))
