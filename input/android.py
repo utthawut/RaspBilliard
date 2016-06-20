@@ -1,7 +1,7 @@
 
 
 from __future__ import division
-import base
+import input.base as base
 
 
 class GameInput(base.InputBase):
