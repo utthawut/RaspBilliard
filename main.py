@@ -32,7 +32,7 @@ import time
 import numpy as np
 from input.base import InputMode, InputMax, InputMin, InputRes
 import input.normal
-import input.sensor
+import input.virtual
 import input.android
 
 # Select input mode here
@@ -140,8 +140,8 @@ my_mouse = pi3d.Mouse(restrict=False)
 my_mouse.start()
 if input_mode == InputMode.NORMAL:
     my_input = input.normal.GameInput(keyboard_obj=my_keys, mouse_obj=my_mouse)
-elif input_mode == InputMode.SENSOR:
-    my_input = input.sensor.GameInput()     # future
+elif input_mode == InputMode.VIRTUAL:
+    my_input = input.virtual.GameInput()     # future
 elif input_mode == InputMode.ANDROID:
     my_input = input.android.GameInput()    # future
 else:

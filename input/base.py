@@ -28,7 +28,7 @@ class InputMode(object):
     Input mode selectable
     """
     NORMAL = 0
-    SENSOR = 1
+    VIRTUAL = 1
     ANDROID = 2
 
 
@@ -117,7 +117,7 @@ class InputBase(object):
                     self.cam_dist = None
                 elif self.update_cam_radius():
                     pass
-        elif self.input_mode == InputMode.SENSOR:
+        elif self.input_mode == InputMode.VIRTUAL:
             pass    # future
         elif self.input_mode == InputMode.ANDROID:
             pass    # future
@@ -144,7 +144,7 @@ class InputBase(object):
                     self.cam_dist = None
                 elif self.update_cam_radius():
                     pass
-        elif self.input_mode == InputMode.SENSOR:
+        elif self.input_mode == InputMode.VIRTUAL:
             pass    # future
         elif self.input_mode == InputMode.ANDROID:
             pass    # future
