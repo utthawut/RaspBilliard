@@ -63,7 +63,8 @@ calculate.CalConst.initial_constant()
 ball_shader = pi3d.Shader("uv_reflect")
 table_shader = ball_shader
 shadow_shader = pi3d.Shader("uv_flat")
-table_tex = pi3d.Texture("media/textures/felt.jpg")
+felt_tex = pi3d.Texture("media/textures/felt.jpg")
+wood_tex = pi3d.Texture("media/textures/wood.jpg")
 cue_tex = pi3d.Texture("media/textures/cue_tex.png")
 norm_tex = pi3d.Texture("media/textures/grasstile_n.jpg")
 shine_tex = pi3d.Texture("media/textures/photosphere_small.jpg")
@@ -77,9 +78,12 @@ light_source = pi3d.Light(
 # Create Table
 table_model = pi3d.Model(file_string='media/models/Pool_Table_8ft.obj', name='Table',
                         sx=common.DIM_RATIO, sy=common.DIM_RATIO, sz=common.DIM_RATIO, light=light_source)
-# table_model.set_shader(table_shader)
-# table_model.set_normal_shine(norm_tex, 500.0, shine_tex, 0.05, bump_factor=0.1)
-table_model.set_draw_details(table_shader, [table_tex, norm_tex, shine_tex], 500.0, 0.01, 0.1)
+#table_model.set_shader(table_shader)
+#table_model.set_normal_shine(norm_tex, 500.0, shine_tex, 0.05, bump_factor=0.1)
+table_model.buf[0].set_material((0.2, 0.1, 0.15))
+table_model.buf[0].set_draw_details(shadow_shader, [felt_tex, norm_tex, shine_tex], 100.0, 0.8, 0.0)
+table_model.buf[1].set_draw_details(table_shader, [wood_tex, norm_tex, shine_tex], 100.0, 0.05, 0.1)
+table_model.buf[2].set_draw_details(table_shader, [felt_tex, norm_tex, shine_tex], 100.0, 0.0, 0.1)
 
 # Create Trajectories
 traject_list = [(i*0.1, i*0.1, i*0.1) for i in range(500)]
@@ -193,7 +197,7 @@ while display.loop_running():
                 # ball_obj.w_roll = ball_obj_traject.w_to_render[render_index]
                 ball_obj.present_state = ball_obj_traject.state_to_render[render_index]
                 ball_obj.heading_angle = ball_obj_traject.heading_angle_to_render[render_index]
-                ball_obj.heading_angle_changed = ball_obj_traject.heading_angle_changed_to_render[render_index]
+                ball_obj.heading_angle_changed |= ball_obj_traject.heading_angle_changed_to_render[render_index]
                 ball_obj.move_rotate(t=sum_del_t, prev_posit=previous_r)
 
             render_index += 1
