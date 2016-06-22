@@ -197,7 +197,7 @@ while display.loop_running():
                 # ball_obj.w_roll = ball_obj_traject.w_to_render[render_index]
                 ball_obj.present_state = ball_obj_traject.state_to_render[render_index]
                 ball_obj.heading_angle = ball_obj_traject.heading_angle_to_render[render_index]
-                ball_obj.heading_angle_changed |= ball_obj_traject.heading_angle_changed_to_render[render_index]
+                ball_obj.heading_angle_changed = ball_obj_traject.heading_angle_changed_to_render[render_index]
                 ball_obj.move_rotate(t=sum_del_t, prev_posit=previous_r)
 
             render_index += 1

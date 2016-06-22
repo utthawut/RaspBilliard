@@ -568,6 +568,11 @@ class PoolBall(object):
         self.empty1.positionZ(self.r.real[common.Y_AXIS]*common.DIM_RATIO)
 
         if self.present_state == ROLLING_STATE:
+            if self.heading_angle_changed:
+                self.heading_angle_changed = False
+                self.empty1.rotateToY(-self.heading_angle)
+                # self.empty2.rotateIncY(self.heading_angle)  # It need to have the Euler angles worked
+
             dif = self.r - prev_posit  # Current position - Previous position
             distance = np.linalg.norm(dif)  # Magnitude
             if distance:
@@ -584,11 +589,6 @@ class PoolBall(object):
                 # self.empty1.draw()
                 # self.empty1.translateX((self.r.real[common.X_AXIS] - prev_posit.real[common.X_AXIS])*common.DIM_RATIO)
                 # self.empty1.translateZ((self.r.real[common.Y_AXIS] - prev_posit.real[common.Y_AXIS])*common.DIM_RATIO)
-
-                if self.heading_angle_changed:
-                    self.heading_angle_changed = False
-                    self.empty1.rotateToY(-self.heading_angle)
-                    self.empty2.rotateIncY(self.heading_angle)  # It need to have the Euler angles worked
 
                 self.empty2.rotateIncX(angle)
 
