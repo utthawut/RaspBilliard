@@ -273,7 +273,7 @@ class InputBase(object):
         new_tb_spin = self.get_tb_spin()
         if new_tb_spin is not None:
             if InputMin.SPIN <= new_tb_spin <= InputMax.SPIN:
-                collide_point = math.hypot(self.lr_spin, self.tb_spin)
+                collide_point = math.hypot(new_tb_spin, self.lr_spin)
                 if collide_point <= InputMax.SPIN:
                     self.tb_spin = new_tb_spin
                     return True
@@ -284,7 +284,7 @@ class InputBase(object):
         new_lr_spin = self.get_lr_spin()
         if new_lr_spin is not None:
             if InputMin.SPIN <= new_lr_spin <= InputMax.SPIN:
-                collide_point = math.hypot(self.lr_spin, self.tb_spin)
+                collide_point = math.hypot(new_lr_spin, self.tb_spin)
                 if collide_point <= InputMax.SPIN:
                     self.lr_spin = new_lr_spin
                     return True

@@ -80,10 +80,10 @@ table_model = pi3d.Model(file_string='media/models/Pool_Table_8ft.obj', name='Ta
                         sx=common.DIM_RATIO, sy=common.DIM_RATIO, sz=common.DIM_RATIO, light=light_source)
 #table_model.set_shader(table_shader)
 #table_model.set_normal_shine(norm_tex, 500.0, shine_tex, 0.05, bump_factor=0.1)
-table_model.buf[0].set_material((0.2, 0.1, 0.15))
-table_model.buf[0].set_draw_details(shadow_shader, [felt_tex, norm_tex, shine_tex], 100.0, 0.8, 0.0)
-table_model.buf[1].set_draw_details(table_shader, [wood_tex, norm_tex, shine_tex], 100.0, 0.05, 0.1)
-table_model.buf[2].set_draw_details(table_shader, [felt_tex, norm_tex, shine_tex], 100.0, 0.0, 0.1)
+table_model.buf[1].set_material((0.2, 0.1, 0.15))
+table_model.buf[1].set_draw_details(table_shader, [wood_tex, norm_tex, shine_tex], 100.0, 0.2, 2.2)
+table_model.buf[2].set_draw_details(table_shader, [wood_tex, norm_tex, shine_tex], 100.0, 0.05, 0.1)
+table_model.buf[0].set_draw_details(table_shader, [felt_tex, norm_tex, shine_tex], 100.0, 0.0, 0.1)
 
 # Create Trajectories
 traject_list = [(i*0.1, i*0.1, i*0.1) for i in range(500)]
