@@ -163,7 +163,7 @@ def counter_clockwise_vector(vector, heading_angle):
 
     rot_matrix = np.array([[cos_data, -sin_data], [sin_data, cos_data]], dtype=float)
 
-    return np.dot(rot_matrix, vector.real)
+    return np.dot(rot_matrix, vector)
 
 
 def clockwise_vector(vector, heading_angle):
@@ -178,7 +178,7 @@ def clockwise_vector(vector, heading_angle):
 
     rot_matrix = np.array([[cos_data, sin_data], [-sin_data, cos_data]], dtype=float)
 
-    return np.dot(rot_matrix, vector.real)
+    return np.dot(rot_matrix, vector)
 
 
 def abs_exclude_z(vector):
@@ -245,9 +245,9 @@ def cal_time_slide_end(u0):
 
 
 def cal_slide_posit(r0, heading_angle, v0, u0_unit, t):
-    v0 = np.delete(v0.real, common.Z_AXIS)
-    u0_unit = np.delete(u0_unit.real, common.Z_AXIS)
-    v0 = v0.real * t
+    v0 = np.delete(v0, common.Z_AXIS)
+    u0_unit = np.delete(u0_unit, common.Z_AXIS)
+    v0 = v0 * t
     u0_unit *= (CalConst.ZERO_P_FIVE_SLIDE_FRICT_G*t*t)
     rb = v0 - u0_unit
     rt = counter_clockwise_vector(rb, heading_angle)
@@ -261,14 +261,14 @@ def cal_slide_velo(v0, u0_unit, t):
 
 def cal_slide_angular_velo_plane(w0_plane, u0_unit, t):
     if np.linalg.norm(w0_plane) > 0:
-        sign_x_before = check_sign(w0_plane.real[common.X_AXIS])
-        sign_y_before = check_sign(w0_plane.real[common.Y_AXIS])
+        sign_x_before = check_sign(w0_plane[common.X_AXIS])
+        sign_y_before = check_sign(w0_plane[common.Y_AXIS])
 
         w0_plane_after = w0_plane - ((CalConst.FIVE_SPIN_FRICT_G_DIV_TWO_R*t)*np.cross(BilliardBall.k_vector, u0_unit))
 
-        if check_sign(w0_plane_after.real[common.X_AXIS]) != sign_x_before:
+        if check_sign(w0_plane_after[common.X_AXIS]) != sign_x_before:
             w0_plane_after[common.X_AXIS] = 0
-        if check_sign(w0_plane_after.real[common.Y_AXIS]) != sign_y_before:
+        if check_sign(w0_plane_after[common.Y_AXIS]) != sign_y_before:
             w0_plane_after[common.Y_AXIS] = 0
         return w0_plane_after
     return np.copy(w0_plane)
@@ -284,14 +284,14 @@ def cal_roll_posit(r0, heading_angle, v0, v0_unit, t):
 
 
 def cal_roll_velo(v0, v0_unit, t):
-    sign_x_before = check_sign(v0.real[common.X_AXIS])
-    sign_y_before = check_sign(v0.real[common.Y_AXIS])
+    sign_x_before = check_sign(v0[common.X_AXIS])
+    sign_y_before = check_sign(v0[common.Y_AXIS])
 
     v0_after = v0 - (CalConst.ROLL_FRICT_G*t*v0_unit)
 
-    if check_sign(v0_after.real[common.X_AXIS]) != sign_x_before:
+    if check_sign(v0_after[common.X_AXIS]) != sign_x_before:
         v0_after[common.X_AXIS] = 0
-    if check_sign(v0_after.real[common.Y_AXIS]) != sign_y_before:
+    if check_sign(v0_after[common.Y_AXIS]) != sign_y_before:
         v0_after[common.Y_AXIS] = 0
     return v0_after
 
@@ -559,13 +559,13 @@ class PoolBall(object):
             PoolBall(name=ball_obj.name, ball_index=ball_obj.ball_index, r=ball_obj.r, traject_instance=True)
 
     def move_draw(self):
-        self.empty1.positionX(self.r.real[common.X_AXIS]*common.DIM_RATIO)
-        self.empty1.positionZ(self.r.real[common.Y_AXIS]*common.DIM_RATIO)
+        self.empty1.positionX(self.r[common.X_AXIS]*common.DIM_RATIO)
+        self.empty1.positionZ(self.r[common.Y_AXIS]*common.DIM_RATIO)
         self.empty1.draw()
 
     def move_rotate(self, t, prev_posit):
-        self.empty1.positionX(self.r.real[common.X_AXIS]*common.DIM_RATIO)
-        self.empty1.positionZ(self.r.real[common.Y_AXIS]*common.DIM_RATIO)
+        self.empty1.positionX(self.r[common.X_AXIS]*common.DIM_RATIO)
+        self.empty1.positionZ(self.r[common.Y_AXIS]*common.DIM_RATIO)
 
         if self.present_state == ROLLING_STATE:
             if self.heading_angle_changed:
@@ -587,8 +587,8 @@ class PoolBall(object):
                 angle = np.degrees(angle)*common.DIM_RATIO
 
                 # self.empty1.draw()
-                # self.empty1.translateX((self.r.real[common.X_AXIS] - prev_posit.real[common.X_AXIS])*common.DIM_RATIO)
-                # self.empty1.translateZ((self.r.real[common.Y_AXIS] - prev_posit.real[common.Y_AXIS])*common.DIM_RATIO)
+                # self.empty1.translateX((self.r[common.X_AXIS] - prev_posit[common.X_AXIS])*common.DIM_RATIO)
+                # self.empty1.translateZ((self.r[common.Y_AXIS] - prev_posit[common.Y_AXIS])*common.DIM_RATIO)
 
                 self.empty2.rotateIncX(angle)
 
@@ -1525,7 +1525,7 @@ class PoolBall(object):
                 self.present_state = ROLLING_STATE
                 self.r0 = np.copy(self.r)
                 heading_angle_changed = ((np.degrees(
-                    np.arctan2([self.v[common.X_AXIS].real], [self.v[common.Y_AXIS].real])[0])))
+                    np.arctan2([self.v[common.X_AXIS]], [self.v[common.Y_AXIS]])[0])))
                 self.heading_angle = (self.heading_angle - heading_angle_changed + 180) % 360 - 180
                 # v[common.X_AXIS] will be unpredictable when curve/spin is performed
                 self.v0 = np.array([0, abs_exclude_z(self.v), 0], dtype=float)
@@ -1918,8 +1918,8 @@ class PoolBall(object):
             return common.ZERO_VECTOR, common.ZERO_VECTOR
 
     def update_outgoing_ball_collide(self, velo, angular_velo):
-        # collide_heading_angle = ((((np.degrees(np.arctan2([velo.real[common.Y_AXIS]],
-        # [velo.real[common.X_AXIS.real]])[0]) +360) % 360)) + 270) % 360
+        # collide_heading_angle = ((((np.degrees(np.arctan2([velo[common.Y_AXIS]],
+        # [velo[common.X_AXIS]])[0]) +360) % 360)) + 270) % 360
 
         # collide_v = np.array([0, abs_exclude_z(velo), 0], dtype=float)
         # collide_w = (np.concatenate((clockwise_vector(np.delete(angular_velo, common.Z_AXIS),
@@ -1931,7 +1931,7 @@ class PoolBall(object):
 
         # self.update_state_collide()
 
-        collide_heading_angle = ((np.degrees(np.arctan2([velo[common.Y_AXIS].real], [velo[common.X_AXIS].real])[0]) +
+        collide_heading_angle = ((np.degrees(np.arctan2([velo[common.Y_AXIS]], [velo[common.X_AXIS]])[0]) +
                                   270) % 360)
         collide_v = np.array([0, abs_exclude_z(velo), 0], dtype=float)
         # Decrease English effect should be performed?
@@ -1968,7 +1968,7 @@ class PoolBall(object):
         #     print("Collision Response t table:", self.t_table)
 
     def update_outgoing_rail_collide(self, velo, angular_velo):
-        collide_heading_angle = ((np.degrees(np.arctan2([velo[common.Y_AXIS].real], [velo[common.X_AXIS].real])[0]) +
+        collide_heading_angle = ((np.degrees(np.arctan2([velo[common.Y_AXIS]], [velo[common.X_AXIS]])[0]) +
                                   270) % 360)
         collide_v = np.array([0, abs_exclude_z(velo), 0], dtype=float)
         collide_w = np.concatenate((clockwise_vector(np.delete(angular_velo, common.Z_AXIS), collide_heading_angle),

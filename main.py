@@ -261,9 +261,9 @@ while display.loop_running():
                                               cue_stick_collide=True)
         cue_ball_traject.update_state_collide()
         # cue_ball_traject.respond_event(find_traject=True, check_event=False)
-        traject_list.append((cue_ball_traject.r.real[common.X_AXIS]*common.DIM_RATIO,
-                             cue_ball_traject.r.real[common.Z_AXIS]*common.DIM_RATIO,
-                             cue_ball_traject.r.real[common.Y_AXIS]*common.DIM_RATIO))
+        traject_list.append((cue_ball_traject.r[common.X_AXIS]*common.DIM_RATIO,
+                             cue_ball_traject.r[common.Z_AXIS]*common.DIM_RATIO,
+                             cue_ball_traject.r[common.Y_AXIS]*common.DIM_RATIO))
         print("Start v impact***", v)
         print("Start w impact***", w)
         print("Start r***", cue_ball_traject.r)
@@ -288,9 +288,9 @@ while display.loop_running():
                     ball.state_to_render.append(ball.present_state)
                     ball.heading_angle_to_render.append(ball.heading_angle)
                     ball.heading_angle_changed_to_render.append(False)
-                traject_list.append((cue_ball_traject.r.real[common.X_AXIS]*common.DIM_RATIO,
-                                     cue_ball_traject.r.real[common.Z_AXIS]*common.DIM_RATIO,
-                                     cue_ball_traject.r.real[common.Y_AXIS]*common.DIM_RATIO))
+                traject_list.append((cue_ball_traject.r[common.X_AXIS]*common.DIM_RATIO,
+                                     cue_ball_traject.r[common.Z_AXIS]*common.DIM_RATIO,
+                                     cue_ball_traject.r[common.Y_AXIS]*common.DIM_RATIO))
                 frame_to_render.append(common.NOR_FRAME_PER_SEC)
 
             # Events occurred in the lasted loop
@@ -310,9 +310,9 @@ while display.loop_running():
                 ball.heading_angle_to_render.append(ball.heading_angle)
                 ball.heading_angle_changed_to_render.append(ball.heading_angle_changed)
 
-            traject_list.append((cue_ball_traject.r.real[common.X_AXIS]*common.DIM_RATIO,
-                                 cue_ball_traject.r.real[common.Z_AXIS]*common.DIM_RATIO,
-                                 cue_ball_traject.r.real[common.Y_AXIS]*common.DIM_RATIO))
+            traject_list.append((cue_ball_traject.r[common.X_AXIS]*common.DIM_RATIO,
+                                 cue_ball_traject.r[common.Z_AXIS]*common.DIM_RATIO,
+                                 cue_ball_traject.r[common.Y_AXIS]*common.DIM_RATIO))
             if remainder_time:
                 frame_to_render.append(common.NOR_FRAME_PER_SEC * (common.NOR_SAMP_PERIOD/remainder_time))
             else:
