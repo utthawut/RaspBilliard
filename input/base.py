@@ -78,7 +78,7 @@ class InputBase(object):
         self.cam_dist = None
 
         self.v_cue = 0
-        self.cue_angle = 3
+        self.cue_angle = 2
 
         self.tb_spin = 0
         self.lr_spin = 0

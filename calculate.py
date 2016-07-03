@@ -92,7 +92,7 @@ class BilliardBall(object):
 
 class MotionFrict(object):
     slide_frict = 0.2
-    roll_frict  = 0.016
+    roll_frict  = 0.015
     spin_frict  = 0.044
 
 
@@ -103,7 +103,7 @@ class BallCollideCoef(object):
 
 class BallFrict(object):
     friction_coef_ball = 0.04
-    friction_coef_rail = 0.14
+    friction_coef_rail = 0.12
 
 
 class CalConst(object):
@@ -1728,11 +1728,7 @@ class PoolBall(object):
 
         if relative_v_dot_n_unit < 0:
             # Compute Impulse
-            if self.present_state == ROLLING_STATE or (not self.allow_response_sliding):
-                # Ignore Angular
-                relative_v_dot_n_unit_for_j = incoming_velo.dot(collision_normal_unit)
-            else:
-                relative_v_dot_n_unit_for_j = relative_v_dot_n_unit
+            relative_v_dot_n_unit_for_j = relative_v_dot_n_unit
 
             j = ((-(1.0 + BallCollideCoef.restitution_coef_cushion) * relative_v_dot_n_unit_for_j) /
                  ((1.0/BilliardBall.ball_mass) +
@@ -1748,7 +1744,8 @@ class PoolBall(object):
             collision_tangent[common.Z_AXIS] = -collision_tangent[common.Z_AXIS]
             collision_tangent_unit = cal_unit_vector(collision_tangent)
 
-            if abs(relative_velo.dot(collision_tangent_unit)) > 0:
+            print("Tangential", abs(relative_velo.dot(collision_tangent_unit)))
+            if abs(relative_velo.dot(collision_tangent_unit)) > 0.6:
                 # Tangent dominated
                 # Calculate commonly used data
                 plus_impulse = (j*collision_normal_unit) + ((BallFrict.friction_coef_rail*j)*collision_tangent_unit)
@@ -1859,18 +1856,12 @@ class PoolBall(object):
 
     def prepare_incoming_ball_collide(self):
         if self.present_state == SLIDING_STATE:
-            # return (np.concatenate((counter_clockwise_vector(np.delete(self.u, common.Z_AXIS), self.heading_angle),
-            # [0])), np.concatenate((counter_clockwise_vector(np.delete(self.w_plane, common.Z_AXIS),
-            # self.heading_angle), [self.w_vertical])))
-
             return (np.concatenate(
                 (counter_clockwise_vector(np.delete(self.v, common.Z_AXIS), self.heading_angle), [0])),
                     np.concatenate(
                         (counter_clockwise_vector(np.delete(self.w_plane, common.Z_AXIS), self.heading_angle),
                          [self.w_vertical])))
         elif self.present_state == ROLLING_STATE:
-            # return (np.concatenate((counter_clockwise_vector(np.delete(self.v, common.Z_AXIS), self.heading_angle),
-            # [0])), common.ZERO_VECTOR)
             v_table = np.concatenate(
                 (counter_clockwise_vector(np.delete(self.v, common.Z_AXIS), self.heading_angle), [0]))
             return (v_table,
@@ -1884,88 +1875,39 @@ class PoolBall(object):
             return common.ZERO_VECTOR, common.ZERO_VECTOR
 
     def prepare_incoming_rail_collide(self):
-        # if (self.present_state == SLIDING_STATE and self.allow_response_sliding):
-        if self.present_state == SLIDING_STATE:
-            # return (np.concatenate((counter_clockwise_vector(np.delete(self.v, common.Z_AXIS), self.heading_angle),
-            # [0])),  np.array([0, 0, self.w_vertical], dtype=float))
-
-            return (np.concatenate(
-                (counter_clockwise_vector(np.delete(self.v, common.Z_AXIS), self.heading_angle), [0])),
-                    np.concatenate(
-                        (counter_clockwise_vector(np.delete(self.w_plane, common.Z_AXIS), self.heading_angle),
-                         [self.w_vertical])))
-            # v_table = (np.concatenate((counter_clockwise_vector(np.delete(self.v, common.Z_AXIS),
-            # self.heading_angle), [0])))
-            # r = np.array([0, 0, BilliardBall.r], dtype=float)
-            # abs_r = np.linalg.norm(r)
-            # return (v_table, np.concatenate((np.delete(np.cross(r, v_table)/(abs_r*abs_r)*0.5, common.Z_AXIS),
-            # [self.w_vertical])))
+        if self.present_state == SLIDING_STATE and self.allow_response_sliding:
+            v = np.concatenate((counter_clockwise_vector(np.delete(self.v, common.Z_AXIS), self.heading_angle), [0]))
+            w = np.concatenate((counter_clockwise_vector(np.delete(self.w_plane, common.Z_AXIS),
+                                                         self.heading_angle), [self.w_vertical]))
+            return v, w
 
         elif (self.present_state == ROLLING_STATE or
                 (self.present_state == SLIDING_STATE and (not self.allow_response_sliding))):
-            # return (np.concatenate((counter_clockwise_vector(np.delete(self.v, common.Z_AXIS), self.heading_angle),
-            # [0])), np.array([0, 0, self.w_vertical], dtype=float))
             v_table = np.concatenate((counter_clockwise_vector(np.delete(self.v, common.Z_AXIS), self.heading_angle),
                                       [0]))
-            # Decrease Energy from angular effect should be performed?
-            return (v_table,
-                    np.concatenate(
+            w_table = np.concatenate(
                         (np.delete(np.cross(BilliardBall.r_k_vector, v_table)/BilliardBall.abs_r_square, common.Z_AXIS),
-                         [self.w_vertical])))
+                         [0]))
+            return v_table, w_table
+
         elif self.present_state == SPINNING_STATE:
             return common.ZERO_VECTOR, np.array([0, 0, self.w_vertical], dtype=float)
         else:
             return common.ZERO_VECTOR, common.ZERO_VECTOR
 
     def update_outgoing_ball_collide(self, velo, angular_velo):
-        # collide_heading_angle = ((((np.degrees(np.arctan2([velo[common.Y_AXIS]],
-        # [velo[common.X_AXIS]])[0]) +360) % 360)) + 270) % 360
-
-        # collide_v = np.array([0, abs_exclude_z(velo), 0], dtype=float)
-        # collide_w = (np.concatenate((clockwise_vector(np.delete(angular_velo, common.Z_AXIS),
-        # collide_heading_angle)*0.7, [angular_velo[common.Z_AXIS]])))
-
-        # collide_u = cal_relative_velo_impact(collide_v, collide_w)
-        # self.init_collide_outcome(state = STATIONARY_STATE, heading_angle = collide_heading_angle, v = collide_v,
-        # w = collide_w, u = collide_u)
-
-        # self.update_state_collide()
-
         collide_heading_angle = ((np.degrees(np.arctan2([velo[common.Y_AXIS]], [velo[common.X_AXIS]])[0]) +
                                   270) % 360)
         collide_v = np.array([0, abs_exclude_z(velo), 0], dtype=float)
-        # Decrease English effect should be performed?
         collide_w = np.concatenate(
             (clockwise_vector(np.delete(angular_velo, common.Z_AXIS), collide_heading_angle),
              [angular_velo[common.Z_AXIS]]))
 
-        # collide_w = np.concatenate((clockwise_vector(np.delete(angular_velo, common.Z_AXIS),
-        # collide_heading_angle)*0.7, [angular_velo[common.Z_AXIS]]))   # Decrease English effect should be performed?
-
-        if self.present_state == SLIDING_STATE and self.allow_response_sliding:
-            self.allow_response_sliding = False
-            # collide_u = cal_relative_velo_impact(velo, angular_velo)
-            # collide_u = np.concatenate((clockwise_vector(np.delete(collide_u, common.Z_AXIS), collide_heading_angle),
-            # [collide_u[common.Z_AXIS]]))
-
-            collide_u = cal_relative_velo_impact(collide_v, collide_w)
-            # collide_w[common.Z_AXIS] = angular_velo[common.Z_AXIS]
-        else:
-            collide_w = common.ZERO_VECTOR
-            collide_u = common.ZERO_VECTOR
+        collide_u = cal_relative_velo_impact(collide_v, collide_w)
 
         self.init_collide_outcome(state=STATIONARY_STATE, heading_angle=collide_heading_angle, v=collide_v,
                                   w=collide_w, u=collide_u)
         self.update_state_collide()
-
-        # print("Collision Response Ball Name:", self.name)
-        # print("Collision Response r:", self.r)
-        # print("Collision Response u:", self.u)
-        # print("Collision Response v:", self.v)
-        # print("Collision Response w:", self.w_plane)
-        # print("Collision Response head:", self.heading_angle)
-        # if self.ball_index == 0:
-        #     print("Collision Response t table:", self.t_table)
 
     def update_outgoing_rail_collide(self, velo, angular_velo):
         collide_heading_angle = ((np.degrees(np.arctan2([velo[common.Y_AXIS]], [velo[common.X_AXIS]])[0]) +
@@ -1974,21 +1916,11 @@ class PoolBall(object):
         collide_w = np.concatenate((clockwise_vector(np.delete(angular_velo, common.Z_AXIS), collide_heading_angle),
                                     [angular_velo[common.Z_AXIS]]))
 
-        if self.present_state == SLIDING_STATE and self.allow_response_sliding:
+        if self.allow_response_sliding:
             self.allow_response_sliding = False
-
-            # collide_u = cal_relative_velo_impact(velo, angular_velo)
-            # collide_u = np.concatenate((clockwise_vector(np.delete(collide_u, common.Z_AXIS), collide_heading_angle),
-            # [collide_u[common.Z_AXIS]]))
-
             collide_u = cal_relative_velo_impact(collide_v, collide_w)
-
-            # collide_w = common.ZERO_VECTOR
-            # collide_w[common.Z_AXIS] = angular_velo[common.Z_AXIS]
         else:
-            # collide_v *= 0.85
             collide_w = common.ZERO_VECTOR
-            # collide_w[common.Z_AXIS] = angular_velo[common.Z_AXIS]
             collide_u = common.ZERO_VECTOR
 
         self.init_collide_outcome(state=STATIONARY_STATE, heading_angle=collide_heading_angle, v=collide_v,
